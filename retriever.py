@@ -24,17 +24,17 @@ def formatUpstreamQamPoints(data):
     points = []
     for row in data:
         point = {}
-        point["measurement"] = "upstreamQam"
-        point["tags"] = {}
-        point["tags"]["channel"] = row[0]
-        point["tags"]["lockStatus"] = row[1]
-        point["tags"]["usChannelType"] = row[2]
-        point["tags"]["channelId"] = int(row[3])
-        point["tags"]["symbolRate"] = int(row[4])
-        point["tags"]["frequency"] = row[5]
-        point["time"] = sampleTime
-        point["fields"] = {}
-        point["fields"]["power"] = float(row[6].split()[0])
+        point['measurement'] = "upstreamQam"
+        point['tags'] = {}
+        point['tags']['channel'] = row[0]
+        point['tags']['lockStatus'] = row[1]
+        point['tags']['usChannelType'] = row[2]
+        point['tags']['channelId'] = int(row[3])
+        point['tags']['symbolRate'] = int(row[4])
+        point['tags']['frequency'] = row[5]
+        point['time'] = sampleTime
+        point['fields'] = {}
+        point['fields']['power'] = float(row[6].split()[0])
         points.append(point)
 
     return points
@@ -43,16 +43,16 @@ def formatUpstreamOFDMAPoints(data):
     points = []
     for row in data:
         point = {}
-        point["measurement"] = "upstreamOFDMA"
-        point["tags"] = {}
-        point["tags"]["channel"] = row[0]
-        point["tags"]["lockStatus"] = row[1]
-        point["tags"]["modulation"] = row[2]
-        point["tags"]["channelId"] = int(row[3])
-        point["tags"]["frequency"] = row[4]
-        point["time"] = sampleTime
-        point["fields"] = {}
-        point["fields"]["power"] = float(row[5].split()[0])
+        point['measurement'] = "upstreamOFDMA"
+        point['tags'] = {}
+        point['tags']['channel'] = row[0]
+        point['tags']['lockStatus'] = row[1]
+        point['tags']['modulation'] = row[2]
+        point['tags']['channelId'] = int(row[3])
+        point['tags']['frequency'] = row[4]
+        point['time'] = sampleTime
+        point['fields'] = {}
+        point['fields']['power'] = float(row[5].split()[0])
         points.append(point)
 
     return points
@@ -61,19 +61,19 @@ def formatDownstreamQamPoints(data):
     points = []
     for row in data:
         point = {}
-        point["measurement"] = "downstreamQam"
-        point["tags"] = {}
-        point["tags"]["channel"] = row[0]
-        point["tags"]["lockStatus"] = row[1]
-        point["tags"]["modulation"] = row[2]
-        point["tags"]["channelId"] = int(row[3])
-        point["tags"]["frequency"] = row[4]
-        point["time"] = sampleTime
-        point["fields"] = {}
-        point["fields"]["power"] = float(row[5].split()[0])
-        point["fields"]["snr"] = float(row[6].split()[0])
-        point["fields"]["correctables"] = int(row[7])
-        point["fields"]["uncorrectables"] = int(row[8])
+        point['measurement'] = "downstreamQam"
+        point['tags'] = {}
+        point['tags']['channel'] = row[0]
+        point['tags']['lockStatus'] = row[1]
+        point['tags']['modulation'] = row[2]
+        point['tags']['channelId'] = int(row[3])
+        point['tags']['frequency'] = row[4]
+        point['time'] = sampleTime
+        point['fields'] = {}
+        point['fields']['power'] = float(row[5].split()[0])
+        point['fields']['snr'] = float(row[6].split()[0])
+        point['fields']['correctables'] = int(row[7])
+        point['fields']['uncorrectables'] = int(row[8])
         points.append(point)
 
     return points
@@ -82,21 +82,21 @@ def formatDownstreamOFDMPoints(data):
     points = []
     for row in data:
         point = {}
-        point["measurement"] = "downstreamOFDM"
-        point["tags"] = {}
-        point["tags"]["channel"] = row[0]
-        point["tags"]["lockStatus"] = row[1]
-        point["tags"]["modulation"] = row[2]
-        point["tags"]["channelId"] = int(row[3])
-        point["tags"]["frequency"] = row[4]
-        point["time"] = sampleTime
-        point["fields"] = {}
-        point["fields"]["power"] = float(row[5].split()[0])
-        point["fields"]["snr"] = float(row[6].split()[0])
-        point["fields"]["subcarrierRange"] = row[7]
-        point["fields"]["uncorrected"] = int(row[8])
-        point["fields"]["correctables"] = int(row[9])
-        point["fields"]["uncorrectables"] = int(row[10])
+        point['measurement'] = "downstreamOFDM"
+        point['tags'] = {}
+        point['tags']['channel'] = row[0]
+        point['tags']['lockStatus'] = row[1]
+        point['tags']['modulation'] = row[2]
+        point['tags']['channelId'] = int(row[3])
+        point['tags']['frequency'] = row[4]
+        point['time'] = sampleTime
+        point['fields'] = {}
+        point['fields']['power'] = float(row[5].split()[0])
+        point['fields']['snr'] = float(row[6].split()[0])
+        point['fields']['subcarrierRange'] = row[7]
+        point['fields']['uncorrected'] = int(row[8])
+        point['fields']['correctables'] = int(row[9])
+        point['fields']['uncorrectables'] = int(row[10])
         points.append(point)
 
     return points
@@ -112,8 +112,8 @@ influxUser = config['Database']['Username']
 influxPassword = config['Database']['Password']
 
 modemAuthentication = {
-    "loginName": "admin",
-    "loginPassword": config['Modem']['Password']
+    'loginName': "admin",
+    'loginPassword': config['Modem']['Password']
 }
 
 dbClient = InfluxDBClient(host=influxHost, port=influxPort, username=influxUser, password=influxPassword)
@@ -163,7 +163,7 @@ if matches:
     downstreamOFDMPoints = formatDownstreamOFDMPoints(downstreamOFDMChannels)
 
     # Store data to InfluxDB
-    dbClient.write_points(upstreamQamPoints)
-    dbClient.write_points(downstreamQamPoints)
-    dbClient.write_points(upstreamOFDMAPoints)
-    dbClient.write_points(downstreamOFDMPoints)
+    # dbClient.write_points(upstreamQamPoints)
+    # dbClient.write_points(downstreamQamPoints)
+    # dbClient.write_points(upstreamOFDMAPoints)
+    # dbClient.write_points(downstreamOFDMPoints)
