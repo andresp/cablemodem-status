@@ -1,6 +1,6 @@
-# Cable Modem status retriever
+# Cable Modem Status Retriever
 
-This script retrieves channel information from a cable modem and stores time series data to an InfluxDB. The data can then be visualized using tools such as Grafana.
+This script retrieves channel information from a cable modem and stores time series data to an InfluxDB. The data can be visualized using tools such as Grafana.
 
 ## Supported Modems
 
