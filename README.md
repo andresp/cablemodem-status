@@ -1,6 +1,6 @@
 # Cable Modem Status Retriever
 
-This script retrieves channel information from a cable modem and stores time series data to an InfluxDB. The data can be visualized using tools such as Grafana.
+This script retrieves channel information from a cable modem and stores time series data to an InfluxDB as well as Event Logs in Loki. The data can be visualized using tools such as Grafana.
 
 ## Supported Modems
 
@@ -10,12 +10,17 @@ This script retrieves channel information from a cable modem and stores time ser
 
 * Python3
 * An InfluxDB database
+* Loki for Event Log collection
 
 ## Installation
 
 Install the following packages with pip
 
-`pip3 install requests beautifulsoup4 influxdb`
+`pip3 install requests beautifulsoup4 influxdb schedule`
+
+Optionally, for log collection:
+
+`pip3 install python-logging-loki`
 
 ## Configuration
 
@@ -39,7 +44,5 @@ Create a cron job (executes every 2 minutes):
   * Arris S33
   * Arris SB8200
   * Motorola MB8600
-* Support collecting event log items
 * Provide a Grafana Dashboard to visualize collected data
 * Provide turnkey instructions to set up InfluxDB, Grafana and retrieval script
-* Consider providing a containerized application

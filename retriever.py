@@ -2,9 +2,35 @@ from bs4 import BeautifulSoup
 import configparser
 from datetime import datetime
 from influxdb import InfluxDBClient
+import logging
+import logging_loki
+import os
+import pytz
 import re
 import requests
 from requests.packages import urllib3
+import schedule
+import time
+
+class CustomTimestampFilter(logging.Filter):
+    def filter(self, record):
+        if hasattr(record, 'timestamp'):
+            record.created = record.timestamp
+        return True
+
+sampleTime = datetime.utcnow().isoformat()
+
+def writeLastRuntime():
+    if os.path.exists(lastRunFilename):
+        os.utime(lastRunFilename, None)
+    else:
+        open(lastRunFilename, 'a').close()
+
+def getLastRuntime():
+    if os.path.exists(lastRunFilename):
+        return datetime.fromtimestamp(os.path.getmtime(lastRunFilename), tz=pytz.timezone(logTimeZone))
+    else:
+        return datetime(1970, 1, 1, 0, 0, 0, 0, tzinfo=pytz.utc)
 
 def parseDelimitedTagValue(tagValue, noTrailingPipe = False):
     dataRowCountIndex = tagValue.index("|")
@@ -101,7 +127,127 @@ def formatDownstreamOFDMPoints(data):
 
     return points
 
+
+def collectionJob():
+
+    consoleLogger.info("Logging into modem")
+
+    session = requests.Session()
+    response = session.get(baseUrl, verify=False)
+
+    # Get login url
+    loginPage = BeautifulSoup(response.content, features="lxml")
+
+    loginForm = loginPage.select("#target")
+    loginUrl = loginForm[0].get("action")
+
+    # Login
+    response = session.post(baseUrl + loginUrl, data=modemAuthentication, verify=False)
+
+    # Get status
+    consoleLogger.info("Getting modem status")
+
+    sampleTime = datetime.utcnow().isoformat()
+    response = session.get(baseUrl + "/DocsisStatus.htm", verify=False)
+
+    # Extract status data
+    statusPage = BeautifulSoup(response.content, features="lxml")
+    script = statusPage.select("head > script:nth-child(24)")
+    scriptText = str(script[0].contents[0])
+
+    matches = re.findall("(var tagValueList = \'([^\']+)\';)", scriptText, re.MULTILINE)
+    if matches:
+        upstreamQamValues = matches[1][1]
+        downstreamQamValues = matches[2][1]
+        upstreamOFDMAValues = matches[3][1]
+        downstreamOFDMValues = matches[4][1]
+
+        upstreamQamChannels = parseDelimitedTagValue(upstreamQamValues)
+        downstreamQamChannels = parseDelimitedTagValue(downstreamQamValues)
+        upstreamOFDMAChannels = parseDelimitedTagValue(upstreamOFDMAValues, noTrailingPipe=True)
+        downstreamOFDMChannels = parseDelimitedTagValue(downstreamOFDMValues)
+
+        upstreamQamPoints = formatUpstreamQamPoints(upstreamQamChannels)
+        downstreamQamPoints = formatDownstreamQamPoints(downstreamQamChannels)
+        upstreamOFDMAPoints = formatUpstreamOFDMAPoints(upstreamOFDMAChannels)
+        downstreamOFDMPoints = formatDownstreamOFDMPoints(downstreamOFDMChannels)
+
+        # Store data to InfluxDB
+        dbClient.write_points(upstreamQamPoints)
+        dbClient.write_points(downstreamQamPoints)
+        dbClient.write_points(upstreamOFDMAPoints)
+        dbClient.write_points(downstreamOFDMPoints)
+
+    if collectLogs:
+
+        consoleLogger.info("Getting event logs")
+
+        lastRunTime = getLastRuntime()
+
+        handler = logging_loki.LokiHandler(
+            url=lokiUrl + "/loki/api/v1/push", 
+            tags={'application': "cablemodem-status-logs"},
+            auth=(lokiUsername, lokiPassword),
+            version="1",
+        )
+
+        filter = CustomTimestampFilter()
+
+        logger = logging.getLogger("loki-logger")
+        logger.addHandler(handler)
+        logger.addFilter(filter)
+            
+        eventLogResponse = session.get(baseUrl + "/eventLog.htm", verify=False)
+
+        # Extract status data
+        eventLogPage = BeautifulSoup(eventLogResponse.content, features="lxml")
+        eventLogScript = eventLogPage.select("head > script:nth-child(23)")
+        scriptText = str(eventLogScript[0].contents[0])
+
+        matches = re.findall("(var xmlFormat = \"([^\"]+)\";)", scriptText, re.MULTILINE)
+        if matches:
+            logEntriesXml = matches[0][1].replace('\\/', '/')
+            logs = BeautifulSoup(logEntriesXml, features="lxml")
+            
+            for entry in logs.find_all('tr'):
+                timestampValue = entry.docsdevevtime.text
+
+                if timestampValue == "Time Not Established":
+                    timestampValue = datetime.now(tz=pytz.timezone(logTimeZone)).strftime('%a %b %d %H:%M:%S %Y')
+
+                logTimestamp = datetime.strptime(timestampValue, '%a %b %d %H:%M:%S %Y').astimezone(tz=pytz.timezone(logTimeZone))
+                if logTimestamp > lastRunTime:
+                    message = entry.docsdevevtext.text
+
+                    eventTypeCode = None
+                    eventTypeCodeSearch = re.search(r'Event Type Code: ([\d]+)', message)
+                    if eventTypeCodeSearch:
+                        eventTypeCode = eventTypeCodeSearch.group(1)
+
+                    eventChannelId = None
+                    eventChannelIdSearch = re.search(r'Chan ID: ([\d]+)', message)
+                    if eventChannelIdSearch:
+                        eventChannelId = eventChannelIdSearch.group(1)
+
+                    logLevel = int(re.search(r'([\d]+)', entry.docsdevevlevel.text).group(1))
+
+                    logger.log(modemLogLevels[logLevel], message, extra={'timestamp': logTimestamp.timestamp(), 'tags': {
+                        'logLevel': entry.docsdevevlevel.text, 
+                        'hostname': modemHostname,
+                        'eventTypeCode': eventTypeCode,
+                        'eventChannelId': eventChannelId}})
+
+        writeLastRuntime()
+
+    consoleLogger.info("Done collecting status and logs")
+
+# Init logger
+logging.basicConfig(level=logging.INFO)
+consoleLogger = logging.getLogger("console-logger")
+
 # Read configuration
+consoleLogger.info("Reading configuration")
+
 config = configparser.ConfigParser()
 config.read('configuration.ini')
 
@@ -111,59 +257,46 @@ influxPort = int(config['Database']['Port'])
 influxUser = config['Database']['Username']
 influxPassword = config['Database']['Password']
 
+collectLogs = config['Modem'].getboolean('CollectLogs')
+logTimeZone = config['Modem']['LogTimezone']
+
+lokiUrl = config['Loki']['Url']
+lokiUsername = config['Loki']['Username']
+lokiPassword = config['Loki']['Password']
+
+runAsDaemon = config['General'].getboolean('Daemon')
+runEveryMinutes = int(config['General']['RunEveryMinutes'])
+
 modemAuthentication = {
     'loginName': "admin",
     'loginPassword': config['Modem']['Password']
 }
 
+modemLogLevels = {
+    3: logging.CRITICAL,
+    5: logging.WARNING,
+    6: logging.INFO
+}
+
+consoleLogger.info("Connecting to InfluxDB")
+
 dbClient = InfluxDBClient(host=influxHost, port=influxPort, username=influxUser, password=influxPassword)
 dbClient.switch_database(influxDatabase)
+modemHostname = config['Modem']['Host']
+baseUrl = "https://" + modemHostname
 
-baseUrl = "https://" + config['Modem']['Host']
+lastRunFilename = "cablemodem-status.last"
 
 # Because the modem uses a self-signed certificate and this is expected, disabling the warning to reduce noise.
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
-session = requests.Session()
-response = session.get(baseUrl, verify=False)
+if runAsDaemon:
+    consoleLogger.info("Running as daemon")
+    schedule.every(runEveryMinutes).minutes.do(collectionJob)
 
-# Get login url
-loginPage = BeautifulSoup(response.content, features="lxml")
-
-loginForm = loginPage.select("#target")
-loginUrl = loginForm[0].get("action")
-
-# Login
-response = session.post(baseUrl + loginUrl, data=modemAuthentication, verify=False)
-
-# Get status
-sampleTime = datetime.utcnow().isoformat()
-response = session.get(baseUrl + "/DocsisStatus.htm", verify=False)
-
-# Extract status data
-statusPage = BeautifulSoup(response.content, features="lxml")
-script = statusPage.select("head > script:nth-child(24)")
-scriptText = str(script[0].contents[0])
-
-matches = re.findall("(var tagValueList = \'([^\']+)\';)", scriptText, re.MULTILINE)
-if matches:
-    upstreamQamValues = matches[1][1]
-    downstreamQamValues = matches[2][1]
-    upstreamOFDMAValues = matches[3][1]
-    downstreamOFDMValues = matches[4][1]
-
-    upstreamQamChannels = parseDelimitedTagValue(upstreamQamValues)
-    downstreamQamChannels = parseDelimitedTagValue(downstreamQamValues)
-    upstreamOFDMAChannels = parseDelimitedTagValue(upstreamOFDMAValues, noTrailingPipe=True)
-    downstreamOFDMChannels = parseDelimitedTagValue(downstreamOFDMValues)
-
-    upstreamQamPoints = formatUpstreamQamPoints(upstreamQamChannels)
-    downstreamQamPoints = formatDownstreamQamPoints(downstreamQamChannels)
-    upstreamOFDMAPoints = formatUpstreamOFDMAPoints(upstreamOFDMAChannels)
-    downstreamOFDMPoints = formatDownstreamOFDMPoints(downstreamOFDMChannels)
-
-    # Store data to InfluxDB
-    # dbClient.write_points(upstreamQamPoints)
-    # dbClient.write_points(downstreamQamPoints)
-    # dbClient.write_points(upstreamOFDMAPoints)
-    # dbClient.write_points(downstreamOFDMPoints)
+    while 1:
+        schedule.run_pending()
+        time.sleep(1)
+else:
+    consoleLogger.info("One-time execution")
+    collectionJob()
