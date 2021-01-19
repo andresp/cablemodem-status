@@ -38,6 +38,20 @@ Create a cron job (executes every 2 minutes):
 
 `*/2 * * * * /usr/bin/python3 /opt/cm-status/retriever.py 2>&1 > /dev/null`
 
+## Docker
+
+You can build your own image by running:
+
+`docker build -f "Dockerfile" -t cablemodemstatus:latest .`
+
+Once built, create a directory on your host for your configuration.ini file. Then start a container referring to the configuration:
+
+`docker run -d --name cablemodemstatus --restart unless-stopped -v /opt/cablemodemstatus/configuration.ini:/app/configuration.ini cablemodemstatus:latest`
+
+You can monitor the container's status by running:
+
+`docker logs -f cablemodemstatus`
+
 ## Todo
 
 * Make the script modular to support various types of modems. Priority on latest gen DOCSIS 3.1 modems such as:
