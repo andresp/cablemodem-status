@@ -1,6 +1,7 @@
 from bs4 import BeautifulSoup
 import configparser
 from datetime import datetime
+import functools
 from influxdb import InfluxDBClient
 import logging
 import logging_loki
@@ -12,13 +13,25 @@ from requests.packages import urllib3
 import schedule
 import time
 
+def catch_exceptions(cancel_on_failure=False):
+    def catch_exceptions_decorator(job_func):
+        @functools.wraps(job_func)
+        def wrapper(*args, **kwargs):
+            try:
+                return job_func(*args, **kwargs)
+            except:
+                import traceback
+                print(traceback.format_exc())
+                if cancel_on_failure:
+                    return schedule.CancelJob
+        return wrapper
+    return catch_exceptions_decorator
+
 class CustomTimestampFilter(logging.Filter):
     def filter(self, record):
         if hasattr(record, 'timestamp'):
             record.created = record.timestamp
         return True
-
-sampleTime = datetime.utcnow().isoformat()
 
 def writeLastRuntime():
     if os.path.exists(lastRunFilename):
@@ -46,7 +59,7 @@ def parseDelimitedTagValue(tagValue, noTrailingPipe = False):
 
     return dataRows
 
-def formatUpstreamQamPoints(data):
+def formatUpstreamQamPoints(data, sampleTime):
     points = []
     for row in data:
         point = {}
@@ -65,7 +78,7 @@ def formatUpstreamQamPoints(data):
 
     return points
 
-def formatUpstreamOFDMAPoints(data):
+def formatUpstreamOFDMAPoints(data, sampleTime):
     points = []
     for row in data:
         point = {}
@@ -83,7 +96,7 @@ def formatUpstreamOFDMAPoints(data):
 
     return points
 
-def formatDownstreamQamPoints(data):
+def formatDownstreamQamPoints(data, sampleTime):
     points = []
     for row in data:
         point = {}
@@ -104,7 +117,7 @@ def formatDownstreamQamPoints(data):
 
     return points
 
-def formatDownstreamOFDMPoints(data):
+def formatDownstreamOFDMPoints(data, sampleTime):
     points = []
     for row in data:
         point = {}
@@ -127,7 +140,7 @@ def formatDownstreamOFDMPoints(data):
 
     return points
 
-
+@catch_exceptions(cancel_on_failure=False)
 def collectionJob():
 
     consoleLogger.info("Logging into modem")
@@ -167,10 +180,10 @@ def collectionJob():
         upstreamOFDMAChannels = parseDelimitedTagValue(upstreamOFDMAValues, noTrailingPipe=True)
         downstreamOFDMChannels = parseDelimitedTagValue(downstreamOFDMValues)
 
-        upstreamQamPoints = formatUpstreamQamPoints(upstreamQamChannels)
-        downstreamQamPoints = formatDownstreamQamPoints(downstreamQamChannels)
-        upstreamOFDMAPoints = formatUpstreamOFDMAPoints(upstreamOFDMAChannels)
-        downstreamOFDMPoints = formatDownstreamOFDMPoints(downstreamOFDMChannels)
+        upstreamQamPoints = formatUpstreamQamPoints(upstreamQamChannels, sampleTime)
+        downstreamQamPoints = formatDownstreamQamPoints(downstreamQamChannels, sampleTime)
+        upstreamOFDMAPoints = formatUpstreamOFDMAPoints(upstreamOFDMAChannels, sampleTime)
+        downstreamOFDMPoints = formatDownstreamOFDMPoints(downstreamOFDMChannels, sampleTime)
 
         # Store data to InfluxDB
         dbClient.write_points(upstreamQamPoints)
