@@ -193,7 +193,7 @@ def collectionJob():
 
         filter = CustomTimestampFilter()
 
-        logger = logging.getLogger("loki-logger")
+        logger = logging.getLogger("modem")
         logger.addHandler(handler)
         logger.addFilter(filter)
             
@@ -243,7 +243,7 @@ def collectionJob():
 
 # Init logger
 logging.basicConfig(level=logging.INFO)
-consoleLogger = logging.getLogger("console-logger")
+consoleLogger = logging.getLogger("app")
 
 # Read configuration
 consoleLogger.info("Reading configuration")
