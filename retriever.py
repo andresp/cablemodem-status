@@ -41,7 +41,7 @@ def writeLastRuntime():
 
 def getLastRuntime():
     if os.path.exists(lastRunFilename):
-        return datetime.fromtimestamp(os.path.getmtime(lastRunFilename), tz=pytz.timezone(logTimeZone))
+        return datetime.fromtimestamp(os.path.getmtime(lastRunFilename), tz=pytz.timezone(hostTimeZone))
     else:
         return datetime(1970, 1, 1, 0, 0, 0, 0, tzinfo=pytz.utc)
 
@@ -272,6 +272,7 @@ influxPassword = config['Database']['Password']
 
 collectLogs = config['Modem'].getboolean('CollectLogs')
 logTimeZone = config['Modem']['LogTimezone']
+hostTimeZone = config['General']['HostTimezone']
 
 lokiUrl = config['Loki']['Url']
 lokiUsername = config['Loki']['Username']
@@ -304,6 +305,7 @@ lastRunFilename = "cablemodem-status.last"
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 if runAsDaemon:
+    collectionJob()
     consoleLogger.info("Running as daemon")
     schedule.every(runEveryMinutes).minutes.do(collectionJob)
 
