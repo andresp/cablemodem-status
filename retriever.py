@@ -262,7 +262,7 @@ consoleLogger = logging.getLogger("app")
 consoleLogger.info("Reading configuration")
 
 config = configparser.ConfigParser()
-config.read('configuration.ini')
+config.read('data/configuration.ini')
 
 influxDatabase = config['Database']['Name']
 influxHost = config['Database']['Host']
@@ -299,7 +299,7 @@ dbClient.switch_database(influxDatabase)
 modemHostname = config['Modem']['Host']
 baseUrl = "https://" + modemHostname
 
-lastRunFilename = "cablemodem-status.last"
+lastRunFilename = "data/cablemodem-status.last"
 
 # Because the modem uses a self-signed certificate and this is expected, disabling the warning to reduce noise.
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)

@@ -44,9 +44,9 @@ You can build your own image by running:
 
 `docker build -f "Dockerfile" -t cablemodemstatus:latest .`
 
-Once built, create a directory on your host for your configuration.ini file. Then start a container referring to the configuration:
+Once built, create a directory on your host for your configuration.ini file, such as `/opt/cablemodemstatus`. Then start a container referring to the configuration directory and mapping it to `/app/data`:
 
-`docker run -d --name cablemodemstatus --restart unless-stopped -v /opt/cablemodemstatus/configuration.ini:/app/configuration.ini cablemodemstatus:latest`
+`docker run -d --name cablemodemstatus --restart unless-stopped -v /opt/cablemodemstatus:/app/data cablemodemstatus:latest`
 
 You can monitor the container's status by running:
 
