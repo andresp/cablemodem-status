@@ -41,7 +41,8 @@ def writeLastRuntime():
 
 def getLastRuntime():
     if os.path.exists(lastRunFilename):
-        return datetime.fromtimestamp(os.path.getmtime(lastRunFilename), tz=pytz.timezone(hostTimeZone))
+        last = datetime.fromtimestamp(os.path.getmtime(lastRunFilename))
+        return pytz.timezone(hostTimeZone).localize(last)
     else:
         return datetime(1970, 1, 1, 0, 0, 0, 0, tzinfo=pytz.utc)
 
@@ -186,10 +187,10 @@ def collectionJob():
         downstreamOFDMPoints = formatDownstreamOFDMPoints(downstreamOFDMChannels, sampleTime)
 
         # Store data to InfluxDB
-        dbClient.write_points(upstreamQamPoints)
-        dbClient.write_points(downstreamQamPoints)
-        dbClient.write_points(upstreamOFDMAPoints)
-        dbClient.write_points(downstreamOFDMPoints)
+        # dbClient.write_points(upstreamQamPoints)
+        # dbClient.write_points(downstreamQamPoints)
+        # dbClient.write_points(upstreamOFDMAPoints)
+        # dbClient.write_points(downstreamOFDMPoints)
 
     if collectLogs:
 
@@ -228,7 +229,8 @@ def collectionJob():
                 if timestampValue == "Time Not Established":
                     timestampValue = datetime.now(tz=pytz.timezone(logTimeZone)).strftime('%a %b %d %H:%M:%S %Y')
 
-                logTimestamp = datetime.strptime(timestampValue, '%a %b %d %H:%M:%S %Y').astimezone(tz=pytz.timezone(logTimeZone))
+                logTimestamp = datetime.strptime(timestampValue, '%a %b %d %H:%M:%S %Y')
+                logTimestamp = pytz.timezone(logTimeZone).localize(logTimestamp)
                 if logTimestamp > lastRunTime:
                     message = entry.docsdevevtext.text
 
