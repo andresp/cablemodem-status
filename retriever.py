@@ -41,8 +41,8 @@ def writeLastRuntime():
 
 def getLastRuntime():
     if os.path.exists(lastRunFilename):
-        last = datetime.fromtimestamp(os.path.getmtime(lastRunFilename))
-        return pytz.timezone(hostTimeZone).localize(last)
+        lastTimestamp = datetime.utcfromtimestamp(os.path.getmtime(lastRunFilename))
+        return pytz.timezone("UTC").localize(lastTimestamp)
     else:
         return datetime(1970, 1, 1, 0, 0, 0, 0, tzinfo=pytz.utc)
 
@@ -187,10 +187,10 @@ def collectionJob():
         downstreamOFDMPoints = formatDownstreamOFDMPoints(downstreamOFDMChannels, sampleTime)
 
         # Store data to InfluxDB
-        # dbClient.write_points(upstreamQamPoints)
-        # dbClient.write_points(downstreamQamPoints)
-        # dbClient.write_points(upstreamOFDMAPoints)
-        # dbClient.write_points(downstreamOFDMPoints)
+        dbClient.write_points(upstreamQamPoints)
+        dbClient.write_points(downstreamQamPoints)
+        dbClient.write_points(upstreamOFDMAPoints)
+        dbClient.write_points(downstreamOFDMPoints)
 
     if collectLogs:
 
@@ -198,19 +198,6 @@ def collectionJob():
 
         lastRunTime = getLastRuntime()
 
-        handler = logging_loki.LokiHandler(
-            url=lokiUrl + "/loki/api/v1/push", 
-            tags={'application': "cablemodem-status-logs"},
-            auth=(lokiUsername, lokiPassword),
-            version="1",
-        )
-
-        filter = CustomTimestampFilter()
-
-        logger = logging.getLogger("modem")
-        logger.addHandler(handler)
-        logger.addFilter(filter)
-            
         eventLogResponse = session.get(baseUrl + "/eventLog.htm", verify=False)
 
         # Extract status data
@@ -223,11 +210,25 @@ def collectionJob():
             logEntriesXml = matches[0][1].replace('\\/', '/')
             logs = BeautifulSoup(logEntriesXml, features="lxml")
             
-            for entry in logs.find_all('tr'):
+            entries = logs.find_all('tr')
+            for index, entry in enumerate(entries):
                 timestampValue = entry.docsdevevtime.text
 
                 if timestampValue == "Time Not Established":
-                    timestampValue = datetime.now(tz=pytz.timezone(logTimeZone)).strftime('%a %b %d %H:%M:%S %Y')
+                    # Find next entry with a valid timestamp, if any
+
+                    foundTimestamp = False
+                    if len(entries) > index + 1:
+                        for nextEntry in entries[index + 1 : ]:
+                            nextEntryTimestamp = nextEntry.docsdevevtime.text
+                            if nextEntryTimestamp != "Time Not Established":
+                                timestampValue = nextEntryTimestamp
+                                foundTimestamp = True
+                                break
+
+                    if foundTimestamp == False:
+                        # Use sampleTime for unknown timestamp
+                        timestampValue = sampleTime.strftime('%a %b %d %H:%M:%S %Y')
 
                 logTimestamp = datetime.strptime(timestampValue, '%a %b %d %H:%M:%S %Y')
                 logTimestamp = pytz.timezone(logTimeZone).localize(logTimestamp)
@@ -296,6 +297,19 @@ modemLogLevels = {
 
 consoleLogger.info("Connecting to InfluxDB")
 
+handler = logging_loki.LokiHandler(
+    url=lokiUrl + "/loki/api/v1/push", 
+    tags={'application': "cablemodem-status-logs"},
+    auth=(lokiUsername, lokiPassword),
+    version="1",
+)
+
+filter = CustomTimestampFilter()
+
+logger = logging.getLogger("modem")
+logger.addHandler(handler)
+logger.addFilter(filter)
+    
 dbClient = InfluxDBClient(host=influxHost, port=influxPort, username=influxUser, password=influxPassword)
 dbClient.switch_database(influxDatabase)
 modemHostname = config['Modem']['Host']
