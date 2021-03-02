@@ -162,59 +162,6 @@ class TechnicolorXB7(ObservableModem):
         sampleTime = datetime.utcnow().isoformat()
 
         lastRunTime = self.getLastRuntime()
-        # eventLogResponse = self.session.get(self.baseUrl + "/eventLog.htm", verify=False)
 
-        # # Extract status data
-        # eventLogPage = BeautifulSoup(eventLogResponse.content, features="lxml")
-        # eventLogScript = eventLogPage.select("head > script:nth-child(23)")
-        # scriptText = str(eventLogScript[0].contents[0])
-
-        # matches = re.findall("(var xmlFormat = \"([^\"]+)\";)", scriptText, re.MULTILINE)
-        # if matches:
-        #     logEntriesXml = matches[0][1].replace('\\/', '/')
-        #     logs = BeautifulSoup(logEntriesXml, features="lxml")
-            
-        #     entries = logs.find_all('tr')
-        #     for index, entry in enumerate(entries):
-        #         timestampValue = entry.docsdevevtime.text
-
-        #         if timestampValue == "Time Not Established":
-        #             # Find next entry with a valid timestamp, if any
-
-        #             foundTimestamp = False
-        #             if len(entries) > index + 1:
-        #                 for nextEntry in entries[index + 1 : ]:
-        #                     nextEntryTimestamp = nextEntry.docsdevevtime.text
-        #                     if nextEntryTimestamp != "Time Not Established":
-        #                         timestampValue = nextEntryTimestamp
-        #                         foundTimestamp = True
-        #                         break
-
-        #             if foundTimestamp == False:
-        #                 # Use sampleTime for unknown timestamp
-        #                 timestampValue = sampleTime.strftime('%a %b %d %H:%M:%S %Y')
-
-        #         logTimestamp = datetime.strptime(timestampValue, '%a %b %d %H:%M:%S %Y')
-        #         logTimestamp = pytz.timezone(self.logTimeZone).localize(logTimestamp)
-        #         if logTimestamp > lastRunTime:
-        #             message = entry.docsdevevtext.text
-
-        #             eventTypeCode = None
-        #             eventTypeCodeSearch = re.search(r'Event Type Code: ([\d]+)', message)
-        #             if eventTypeCodeSearch:
-        #                 eventTypeCode = eventTypeCodeSearch.group(1)
-
-        #             eventChannelId = None
-        #             eventChannelIdSearch = re.search(r'Chan ID: ([\d]+)', message)
-        #             if eventChannelIdSearch:
-        #                 eventChannelId = eventChannelIdSearch.group(1)
-
-        #             logLevel = int(re.search(r'([\d]+)', entry.docsdevevlevel.text).group(1))
-
-        #             self.logger.log(self.modemLogLevels[logLevel], message, extra={'timestamp': logTimestamp.timestamp(), 'tags': {
-        #                 'logLevel': entry.docsdevevlevel.text, 
-        #                 'hostname': self.hostname,
-        #                 'eventTypeCode': eventTypeCode,
-        #                 'eventChannelId': eventChannelId}})
-
+        # Needs implementation
         self.writeLastRuntime()
