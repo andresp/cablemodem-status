@@ -5,7 +5,7 @@ This script retrieves channel information from a cable modem and stores time ser
 ## Supported Modems
 
 * Netgear CM2000
-* Technicolor XB7 (Xfinity)
+* Technicolor XB7
 
 ## Dependencies
 
