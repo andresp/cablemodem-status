@@ -5,6 +5,7 @@ This script retrieves channel information from a cable modem and stores time ser
 ## Supported Modems
 
 * Netgear CM2000
+* Technicolor XB7
 
 ## Dependencies
 
@@ -25,6 +26,11 @@ Optionally, for log collection:
 ## Configuration
 
 Edit [configuration.ini](./configuration.ini) and fill in your information for the InfluxDB and the modem.
+
+Valid strings for `ModemType`:
+
+* `NetgearCM2000`
+* `TechnicolorXB7`
 
 ## Executing the script
 
@@ -54,7 +60,7 @@ You can monitor the container's status by running:
 
 ## Todo
 
-* Make the script modular to support various types of modems. Priority on latest gen DOCSIS 3.1 modems such as:
+* Implement modules for additional modems:
   * Arris S33
   * Arris SB8200
   * Motorola MB8600
