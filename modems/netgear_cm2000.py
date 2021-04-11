@@ -6,6 +6,7 @@ import os
 import pytz
 import re
 import requests
+from influxdb_client import Point
 
 class NetgearCM2000(ObservableModem):
     baseUrl = ""
@@ -44,18 +45,17 @@ class NetgearCM2000(ObservableModem):
     def formatUpstreamQamPoints(self, data, sampleTime):
         points = []
         for row in data:
-            point = {}
-            point['measurement'] = "upstreamQam"
-            point['tags'] = {}
-            point['tags']['channel'] = row[0]
-            point['tags']['lockStatus'] = row[1]
-            point['tags']['usChannelType'] = row[2]
-            point['tags']['channelId'] = int(row[3])
-            point['tags']['symbolRate'] = int(row[4])
-            point['tags']['frequency'] = row[5]
-            point['time'] = sampleTime
-            point['fields'] = {}
-            point['fields']['power'] = float(row[6].split()[0])
+
+            point = Point("upstreamQam") \
+                .tag("channel", row[0]) \
+                .tag("lockStatus", row[1]) \
+                .tag("usChannelType", row[2]) \
+                .tag("channelId", int(row[3])) \
+                .tag("symbolRate", int(row[4])) \
+                .tag("frequency", row[5]) \
+                .time(sampleTime) \
+                .field("power", float(row[6].split()[0]))
+
             points.append(point)
 
         return points
@@ -63,17 +63,16 @@ class NetgearCM2000(ObservableModem):
     def formatUpstreamOFDMAPoints(self, data, sampleTime):
         points = []
         for row in data:
-            point = {}
-            point['measurement'] = "upstreamOFDMA"
-            point['tags'] = {}
-            point['tags']['channel'] = row[0]
-            point['tags']['lockStatus'] = row[1]
-            point['tags']['modulation'] = row[2]
-            point['tags']['channelId'] = int(row[3])
-            point['tags']['frequency'] = row[4]
-            point['time'] = sampleTime
-            point['fields'] = {}
-            point['fields']['power'] = float(row[5].split()[0])
+
+            point = Point("upstreamOFDMA") \
+                .tag("channel", row[0]) \
+                .tag("lockStatus", row[1]) \
+                .tag("modulation", row[2]) \
+                .tag("channelId", int(row[3])) \
+                .tag("frequency", row[4]) \
+                .time(sampleTime) \
+                .field("power", float(row[5].split()[0]))
+
             points.append(point)
 
         return points
@@ -81,20 +80,19 @@ class NetgearCM2000(ObservableModem):
     def formatDownstreamQamPoints(self, data, sampleTime):
         points = []
         for row in data:
-            point = {}
-            point['measurement'] = "downstreamQam"
-            point['tags'] = {}
-            point['tags']['channel'] = row[0]
-            point['tags']['lockStatus'] = row[1]
-            point['tags']['modulation'] = row[2]
-            point['tags']['channelId'] = int(row[3])
-            point['tags']['frequency'] = row[4]
-            point['time'] = sampleTime
-            point['fields'] = {}
-            point['fields']['power'] = float(row[5].split()[0])
-            point['fields']['snr'] = float(row[6].split()[0])
-            point['fields']['correctables'] = int(row[7])
-            point['fields']['uncorrectables'] = int(row[8])
+
+            point = Point("downstreamQam") \
+                .tag("channel", row[0]) \
+                .tag("lockStatus", row[1]) \
+                .tag("modulation", row[2]) \
+                .tag("channelId", int(row[3])) \
+                .tag("frequency", row[4]) \
+                .time(sampleTime) \
+                .field("power", float(row[5].split()[0])) \
+                .field("snr", float(row[6].split()[0])) \
+                .field("correctables", int(row[7])) \
+                .field("uncorrectables", int(row[8]))
+
             points.append(point)
 
         return points
@@ -102,22 +100,21 @@ class NetgearCM2000(ObservableModem):
     def formatDownstreamOFDMPoints(self, data, sampleTime):
         points = []
         for row in data:
-            point = {}
-            point['measurement'] = "downstreamOFDM"
-            point['tags'] = {}
-            point['tags']['channel'] = row[0]
-            point['tags']['lockStatus'] = row[1]
-            point['tags']['modulation'] = row[2]
-            point['tags']['channelId'] = int(row[3])
-            point['tags']['frequency'] = row[4]
-            point['time'] = sampleTime
-            point['fields'] = {}
-            point['fields']['power'] = float(row[5].split()[0])
-            point['fields']['snr'] = float(row[6].split()[0])
-            point['fields']['subcarrierRange'] = row[7]
-            point['fields']['uncorrected'] = int(row[8])
-            point['fields']['correctables'] = int(row[9])
-            point['fields']['uncorrectables'] = int(row[10])
+
+            point = Point("downstreamOFDM") \
+                .tag("channel", row[0]) \
+                .tag("lockStatus", row[1]) \
+                .tag("modulation", row[2]) \
+                .tag("channelId", int(row[3])) \
+                .tag("frequency", row[4]) \
+                .time(sampleTime) \
+                .field("power", float(row[5].split()[0])) \
+                .field("snr", float(row[6].split()[0])) \
+                .field("subcarrierRange", row[7]) \
+                .field("uncorrected", int(row[8])) \
+                .field("correctables", int(row[9])) \
+                .field("uncorrectables", int(row[10]))
+
             points.append(point)
 
         return points
@@ -169,10 +166,10 @@ class NetgearCM2000(ObservableModem):
             downstreamOFDMPoints = self.formatDownstreamOFDMPoints(downstreamOFDMChannels, sampleTime)
 
             # Store data to InfluxDB
-            self.dbClient.write_points(upstreamQamPoints)
-            self.dbClient.write_points(downstreamQamPoints)
-            self.dbClient.write_points(upstreamOFDMAPoints)
-            self.dbClient.write_points(downstreamOFDMPoints)
+            self.write_api.write(bucket=self.influxBucket, record=upstreamQamPoints)
+            self.write_api.write(bucket=self.influxBucket, record=downstreamQamPoints)
+            self.write_api.write(bucket=self.influxBucket, record=upstreamOFDMAPoints)
+            self.write_api.write(bucket=self.influxBucket, record=downstreamOFDMPoints)
 
     def writeLastRuntime(self):
         if os.path.exists(self.lastRunFilename):

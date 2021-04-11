@@ -6,6 +6,7 @@ import os
 import pytz
 import re
 import requests
+from influxdb_client import Point
 
 class TechnicolorXB7(ObservableModem):
     baseUrl = ""
@@ -31,19 +32,17 @@ class TechnicolorXB7(ObservableModem):
         points = []
         for index in range(len(data["channelIds"])):
             
-            point = {}
-            point['measurement'] = "upstreamQam"
-            point['tags'] = {}
-            point['tags']['channel'] = data["channelIds"][index].text
-            point['tags']['lockStatus'] = data["lockStatus"][index].text
-            point['tags']['modulation'] = data["modulation"][index].text
-            point['tags']['channelId'] = int(data["channelIds"][index].text)
-            point['tags']['symbolRate'] = int(data["symbolRate"][index].text)
-            point['tags']['usChannelType'] = data["channelType"][index].text
-            point['tags']['frequency'] = data["frequency"][index].text.split()[0]
-            point['time'] = sampleTime
-            point['fields'] = {}
-            point['fields']['power'] = float(data["power"][index].text.split()[0])
+            point = Point("upstreamQam") \
+                .tag("channel", data["channelIds"][index].text) \
+                .tag("lockStatus", data["lockStatus"][index].text) \
+                .tag("modulation", data["modulation"][index].text) \
+                .tag("channelId", int(data["channelIds"][index].text)) \
+                .tag("symbolRate", int(data["symbolRate"][index].text)) \
+                .tag("usChannelType", data["channelType"][index].text) \
+                .tag("frequency", data["frequency"][index].text.split()[0]) \
+                .time(sampleTime) \
+                .field("power", float(data["power"][index].text.split()[0]))
+
             points.append(point)
 
         return points
@@ -52,38 +51,35 @@ class TechnicolorXB7(ObservableModem):
         points = []
 
         for index in range(len(data["channelIds"])):
-            point = {}
 
             measurement = ""
             if data["modulation"][index].text == "OFDM":
                 measurement = "downstreamOFDM"
             else:
                 measurement = "downstreamQam"
-
-            point['measurement'] = measurement
-            point['tags'] = {}
-            point['tags']['channel'] = data["channelIds"][index].text
-            point['tags']['lockStatus'] = data["lockStatus"][index].text
-            point['tags']['modulation'] = data["modulation"][index].text
-            point['tags']['channelId'] = int(data["channelIds"][index].text)
-            point['tags']['frequency'] = data["frequencies"][index].text.split()[0]
-            point['time'] = sampleTime
-            point['fields'] = {}
+                
             power = data["power"][index].text.split()[0]
             if power == "NA":
                 power = "0"
-
-            point['fields']['power'] = float(power)
 
             snr = data["snr"][index].text.split()[0]
             if snr == "NA":
                 snr = 0
 
-            point['fields']['snr'] = float(snr)
-            point['fields']['subcarrierRange'] = ""
-            point['fields']['uncorrected'] = int(data["uncorrected"][index].text)
-            point['fields']['correctables'] = int(data["corrected"][index].text)
-            point['fields']['uncorrectables'] = int(data["uncorrectable"][index].text)
+            point = Point(measurement) \
+                .tag("channel", data["channelIds"][index].text) \
+                .tag("lockStatus", data["lockStatus"][index].text) \
+                .tag("modulation", data["modulation"][index].text) \
+                .tag("channelId", int(data["channelIds"][index].text)) \
+                .tag("frequency", data["frequencies"][index].text.split()[0]) \
+                .time(sampleTime) \
+                .field("power", float(power)) \
+                .field("snr", float(snr)) \
+                .field("subcarrierRange", "") \
+                .field("uncorrected", int(data["uncorrected"][index].text)) \
+                .field("correctables", int(data["corrected"][index].text)) \
+                .field("uncorrectables", int(data["uncorrectable"][index].text))
+
             points.append(point)
 
         return points
@@ -140,28 +136,9 @@ class TechnicolorXB7(ObservableModem):
         upstreamPoints = self.formatUpstreamPoints(upstream, sampleTime)
 
         # Store data to InfluxDB
-        self.dbClient.write_points(downstreamPoints)
-        self.dbClient.write_points(upstreamPoints)
-
-    def writeLastRuntime(self):
-        if os.path.exists(self.lastRunFilename):
-            os.utime(self.lastRunFilename, None)
-        else:
-            open(self.lastRunFilename, 'a').close()
-
-    def getLastRuntime(self):
-        if os.path.exists(self.lastRunFilename):
-            lastTimestamp = datetime.utcfromtimestamp(os.path.getmtime(self.lastRunFilename))
-            return pytz.timezone("UTC").localize(lastTimestamp)
-        else:
-            return datetime(1970, 1, 1, 0, 0, 0, 0, tzinfo=pytz.utc)
+        self.write_api.write(bucket=self.influxBucket, record=downstreamPoints)
+        self.write_api.write(bucket=self.influxBucket, record=upstreamPoints)
 
     def collectLogs(self):
         self.logger.info("Getting modem event logs")
-
-        sampleTime = datetime.utcnow().isoformat()
-
-        lastRunTime = self.getLastRuntime()
-
-        # Needs implementation
-        self.writeLastRuntime()
+        
