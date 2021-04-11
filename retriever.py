@@ -1,7 +1,7 @@
 from bs4 import BeautifulSoup
 import configparser
 import functools
-from influxdb import InfluxDBClient
+from influxdb_client import InfluxDBClient
 import logging
 import logging_loki
 import pytz
@@ -56,11 +56,10 @@ consoleLogger.info("Reading configuration")
 config = configparser.ConfigParser()
 config.read('data/configuration.ini')
 
-influxDatabase = config['Database']['Name']
+influxOrg = config['Database']['Org']
 influxHost = config['Database']['Host']
-influxPort = int(config['Database']['Port'])
-influxUser = config['Database']['Username']
-influxPassword = config['Database']['Password']
+influxPort = config['Database']['Port']
+influxToken = config['Database']['Token']
 
 collectLogs = config['Modem'].getboolean('CollectLogs')
 
@@ -85,9 +84,10 @@ filter = CustomTimestampFilter()
 logger = logging.getLogger("modem")
 logger.addHandler(handler)
 logger.addFilter(filter)
-    
-dbClient = InfluxDBClient(host=influxHost, port=influxPort, username=influxUser, password=influxPassword)
-dbClient.switch_database(influxDatabase)
+
+influxUrl = "http://" + influxHost + ":" + influxPort
+
+dbClient = InfluxDBClient(url=influxUrl, org=influxOrg, token=influxToken)
 
 modems = {
     "NetgearCM2000": NetgearCM2000(config, dbClient, consoleLogger),
