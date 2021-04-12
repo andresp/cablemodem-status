@@ -4,13 +4,14 @@ This script retrieves channel information from a cable modem and stores time ser
 
 ## Supported Modems
 
+* Motorola MB8600
 * Netgear CM2000
 * Technicolor XB7
 
 ## Dependencies
 
 * Python3
-* An InfluxDB database
+* An InfluxDB 2.0 database
 * Loki for Event Log collection
 
 ## Installation
@@ -29,6 +30,7 @@ Edit [configuration.ini](./configuration.ini) and fill in your information for t
 
 Valid strings for `ModemType`:
 
+* `MotorolaMB8600`
 * `NetgearCM2000`
 * `TechnicolorXB7`
 
@@ -63,6 +65,5 @@ You can monitor the container's status by running:
 * Implement modules for additional modems:
   * Arris S33
   * Arris SB8200
-  * Motorola MB8600
 * Provide a Grafana Dashboard to visualize collected data
 * Provide turnkey instructions to set up InfluxDB, Grafana and retrieval script

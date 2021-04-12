@@ -19,8 +19,6 @@ class TechnicolorXB7(ObservableModem):
         6: logging.INFO
     }
 
-    lastRunFilename = "data/cablemodem-status.last"
-
     def __init__(self, config, dbClient, logger):
         self.hostname = config['Modem']['Host']
         self.baseUrl = "http://" + self.hostname
@@ -140,5 +138,4 @@ class TechnicolorXB7(ObservableModem):
         self.write_api.write(bucket=self.influxBucket, record=upstreamPoints)
 
     def collectLogs(self):
-        self.logger.info("Getting modem event logs")
-        
+        # Not implemented yet        
