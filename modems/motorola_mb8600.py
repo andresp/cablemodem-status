@@ -93,8 +93,8 @@ class MotorolaMB8600(ObservableModem):
 
         # Extract status data
         statusPage = BeautifulSoup(response.content, features="lxml")
-
         tables = statusPage.find_all("table", { "class": "moto-table-content" })
+
         downstreamData = tables[3].find_all("tr")
         downstreamPoints = self.formatDownstreamPoints(downstreamData, sampleTime)
 
