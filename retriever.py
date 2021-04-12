@@ -11,6 +11,7 @@ import schedule
 import time
 from modems.netgear_cm2000 import NetgearCM2000
 from modems.technicolor_xb7 import TechnicolorXB7
+from modems.motorola_mb8600 import MotorolaMB8600
 
 def catch_exceptions(cancel_on_failure=False):
     def catch_exceptions_decorator(job_func):
@@ -90,6 +91,7 @@ influxUrl = "http://" + influxHost + ":" + influxPort
 dbClient = InfluxDBClient(url=influxUrl, org=influxOrg, token=influxToken)
 
 modems = {
+    "MotorolaMB8600": MotorolaMB8600(config, dbClient, consoleLogger),
     "NetgearCM2000": NetgearCM2000(config, dbClient, consoleLogger),
     "TechnicolorXB7": TechnicolorXB7(config, dbClient, consoleLogger)
 }

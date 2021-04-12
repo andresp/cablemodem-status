@@ -140,5 +140,4 @@ class TechnicolorXB7(ObservableModem):
         self.write_api.write(bucket=self.influxBucket, record=upstreamPoints)
 
     def collectLogs(self):
-        self.logger.info("Getting modem event logs")
-        
+        # Not implemented yet        
