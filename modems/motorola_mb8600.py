@@ -19,8 +19,6 @@ class MotorolaMB8600(ObservableModem):
         6: logging.INFO
     }
 
-    lastRunFilename = "data/cablemodem-status.last"
-
     def __init__(self, config, dbClient, logger):
         self.hostname = config['Modem']['Host']
         self.baseUrl = "http://" + self.hostname
