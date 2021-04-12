@@ -107,3 +107,4 @@ class MotorolaMB8600(ObservableModem):
 
     def collectLogs(self):
         # Not implemented yet
+        return
