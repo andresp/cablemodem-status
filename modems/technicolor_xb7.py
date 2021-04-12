@@ -138,4 +138,5 @@ class TechnicolorXB7(ObservableModem):
         self.write_api.write(bucket=self.influxBucket, record=upstreamPoints)
 
     def collectLogs(self):
-        # Not implemented yet        
+        # Not implemented yet
+        return
