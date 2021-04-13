@@ -89,7 +89,7 @@ class TechnicolorXB7(ObservableModem):
             'username': self.config['Modem']['Username'],
             'password': self.config['Modem']['Password']
         }
-        loginUrl = "/check.php"
+        loginUrl = "/check.jst"
 
         self.session.post(self.baseUrl + loginUrl, data=modemAuthentication)
 
@@ -97,7 +97,7 @@ class TechnicolorXB7(ObservableModem):
         self.logger.info("Getting modem status")
 
         sampleTime = datetime.utcnow().isoformat()
-        response = self.session.get(self.baseUrl + "/network_setup.php")
+        response = self.session.get(self.baseUrl + "/network_setup.jst")
 
         # Extract status data
         statusPage = BeautifulSoup(response.content, features="lxml")
