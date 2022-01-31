@@ -113,9 +113,9 @@ class TechnicolorXB7(ObservableModem):
             "snr": downstreamData[3].select("td > div"),
             "power": downstreamData[4].select("td > div"),
             "modulation": downstreamData[5].select("td > div"),
-            "uncorrected": codewordsData[0].select("td > div"),
-            "corrected": codewordsData[1].select("td > div"),
-            "uncorrectable": codewordsData[2].select("td > div")
+            "uncorrected": codewordsData[1].select("td > div"),
+            "corrected": codewordsData[2].select("td > div"),
+            "uncorrectable": codewordsData[3].select("td > div")
         }
 
         downstreamPoints = self.formatDownstreamPoints(downstream, sampleTime)
