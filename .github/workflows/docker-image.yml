@@ -23,4 +23,4 @@ jobs:
       run: |
         docker login -u $DOCKER_USER -p $DOCKER_PASS
     - name: Docker push
-        docker push ${{secrets.DOCKER_USER}}/cablemodem-status:$(date +%s)
+        docker push $DOCKER_USER/cablemodem-status:$(date +%s)
