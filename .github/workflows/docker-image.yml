@@ -20,6 +20,7 @@ jobs:
       env:
         DOCKER_USER: ${{secrets.DOCKER_USER}}
         DOCKER_PASS: ${{secrets.DOCKER_PASS}}
-      run: docker login -u $DOCKER_USER -p $DOCKER_PASS
+      run: |
+        docker login -u $DOCKER_USER -p $DOCKER_PASS
     - name: Docker push
       run: docker push $DOCKER_USER/cablemodem-status:$(date +%s)
