@@ -15,12 +15,14 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag cablemodem-status:$(date +%s)
+      env:
+        DOCKER_USER: ${{secrets.DOCKER_USER}}
+      run: docker build . --file Dockerfile --tag $DOCKER_USER/cablemodem-status:$(date +%s)
     - name: Docker Login
       env:
         DOCKER_USER: ${{secrets.DOCKER_USER}}
         DOCKER_PASS: ${{secrets.DOCKER_PASS}}
       run: |
-        docker login -u $DOCKER_USER -p $DOCKER_PASS
+        echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
     - name: Docker push
       run: docker push ${{secrets.DOCKER_USER}}/cablemodem-status:$(date +%s)
