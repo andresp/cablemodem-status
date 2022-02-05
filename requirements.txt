@@ -11,7 +11,7 @@ mccabe==0.6.1
 msgpack==1.0.2
 pylint==2.6.0
 python-dateutil==2.8.1
-python-logging-loki==0.3.1
+git+https://github.com/andresp/python-logging-loki@78024bf#egg=python-logging-loki
 pytz==2020.5
 requests==2.25.1
 rfc3339==6.2
