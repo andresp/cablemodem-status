@@ -87,7 +87,7 @@ logger = logging.getLogger("modem")
 logger.addHandler(handler)
 logger.addFilter(filter)
 
-influxUrl = "http://" + influxHost + ":" + influxPort
+influxUrl = "https://" + influxHost + ":" + influxPort
 
 dbClient = InfluxDBClient(url=influxUrl, org=influxOrg, token=influxToken, ssl=influxUseTLS)
 
