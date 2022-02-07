@@ -6,7 +6,7 @@ idna==2.10
 influxdb-client==1.16.0
 isort==5.7.0
 lazy-object-proxy==1.4.3
-lxml==4.6.2
+lxml==4.7.1
 mccabe==0.6.1
 msgpack==1.0.2
 pylint==2.6.0
