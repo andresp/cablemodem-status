@@ -61,6 +61,7 @@ influxOrg = config['Database']['Org']
 influxHost = config['Database']['Host']
 influxPort = config['Database']['Port']
 influxToken = config['Database']['Token']
+influxUseTLS = bool(config['Database']['UseTls'])
 
 collectLogs = config['Modem'].getboolean('CollectLogs')
 
@@ -86,9 +87,9 @@ logger = logging.getLogger("modem")
 logger.addHandler(handler)
 logger.addFilter(filter)
 
-influxUrl = "http://" + influxHost + ":" + influxPort
+influxUrl = "https://" + influxHost + ":" + influxPort
 
-dbClient = InfluxDBClient(url=influxUrl, org=influxOrg, token=influxToken)
+dbClient = InfluxDBClient(url=influxUrl, org=influxOrg, token=influxToken, ssl=influxUseTLS)
 
 modems = {
     "MotorolaMB8600": MotorolaMB8600(config, dbClient, consoleLogger),
