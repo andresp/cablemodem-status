@@ -18,7 +18,7 @@ RUN python -m pip install --user -r requirements.txt
 
 FROM python:3.10.5-slim-bullseye as build-image
 WORKDIR /app
-COPY --from=compile-image /app/.local /app/.local
+COPY --from=compile-image /root/.local /app/.local
 
 COPY . /app
 
