@@ -13,7 +13,7 @@ ENV PIP_DISABLE_PIP_VERSION_CHECK=1
 COPY requirements.txt .
 RUN curl https://sh.rustup.rs -sSf -o install-rust.sh
 RUN sh install-rust.sh -q -y
-RUN source $HOME/.cargo/env
+RUN export PATH="$HOME/.cargo/bin:$PATH"
 RUN python -m pip install -r requirements.txt
 
 FROM python:3.10.5-slim-bullseye as build-image
