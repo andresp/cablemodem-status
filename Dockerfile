@@ -1,5 +1,5 @@
 # For more information, please refer to https://aka.ms/vscode-docker-python
-FROM python:3.10.5-bullseye
+FROM python:3.10.5-bullseye AS compile-image
 
 # Keeps Python from generating .pyc files in the container
 ENV PYTHONDONTWRITEBYTECODE=1
@@ -7,12 +7,17 @@ ENV PYTHONDONTWRITEBYTECODE=1
 # Turns off buffering for easier container logging
 ENV PYTHONUNBUFFERED=1
 
+ENV PIP_DISABLE_PIP_VERSION_CHECK=1
+
 # Install pip requirements
 COPY requirements.txt .
 RUN curl https://sh.rustup.rs -sSf -o install-rust.sh
 RUN sh install-rust.sh -q -y
-RUN python -m pip install --upgrade pip
+RUN source $HOME/.cargo/env
 RUN python -m pip install -r requirements.txt
+
+FROM python:3.10.5-slim-bullseye as build-image
+COPY --from=compile-image /root/.local /root/.local
 
 WORKDIR /app
 COPY . /app
