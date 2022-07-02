@@ -14,6 +14,7 @@ python-dateutil==2.8.1
 git+https://github.com/andresp/python-logging-loki@78024bfd8f3fb66a124dd12ed801fb4754523a67#egg=python-logging-loki-andresp
 pytz==2020.5
 requests==2.25.1
+selenium==4.3.0
 rfc3339==6.2
 schedule==0.6.0
 six==1.15.0
