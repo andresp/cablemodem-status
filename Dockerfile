@@ -11,10 +11,6 @@ ENV PIP_DISABLE_PIP_VERSION_CHECK=1
 
 # Install pip requirements
 COPY requirements.txt .
-RUN mkdir -p /root/.cargo && chmod 777 /root/.cargo && mount -t tmpfs none /root/.cargo
-RUN curl https://sh.rustup.rs -sSf -o install-rust.sh
-RUN sh install-rust.sh -q -y
-ENV PATH="/root/.cargo/bin:${PATH}"
 
 RUN python -m pip install --user -r requirements.txt
 
