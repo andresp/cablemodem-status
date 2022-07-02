@@ -81,6 +81,12 @@ class TouchstoneTG3492UPCCH(ObservableModem):
     def login(self):
         self.logger.info("Logging into modem")
 
+        try:
+            passwordInput = self.browser.find_element(By.ID, 'cableModemStatus')
+            self.loggedIn = True
+        except:
+            self.loggedIn = False
+
         if self.loggedIn:
             return
 
@@ -101,7 +107,7 @@ class TouchstoneTG3492UPCCH(ObservableModem):
             self.browser.get(self.baseUrl + "?device_networkstatus&mid=NetworkStatus")
 
             WebDriverWait(self.browser, 60).until(
-                EC.presence_of_element_located((By.ID, "RouterStatus_div"))
+                EC.presence_of_element_located((By.ID, "cableModemStatus"))
             )
             self.logger.info("Login successful")
             self.loggedIn = True
