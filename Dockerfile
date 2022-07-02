@@ -17,9 +17,9 @@ RUN export PATH="$HOME/.cargo/bin:$PATH"
 RUN python -m pip install --user -r requirements.txt
 
 FROM python:3.10.5-slim-bullseye as build-image
+WORKDIR /app
 COPY --from=compile-image /app/.local /app/.local
 
-WORKDIR /app
 COPY . /app
 
 # Switching to a non-root user, please refer to https://aka.ms/vscode-docker-python-user-rights
