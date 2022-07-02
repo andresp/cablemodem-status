@@ -25,7 +25,7 @@ COPY --from=compile-image /root/.local /app/.local
 COPY . /app
 
 # Switching to a non-root user, please refer to https://aka.ms/vscode-docker-python-user-rights
-RUN useradd -d /app appuser && chown -R appuser /app
+RUN useradd -d /app appuser && chown -R appuser /app && chown -R appuser /app/.local
 USER appuser
 
 # During debugging, this entry point will be overridden. For more information, please refer to https://aka.ms/vscode-docker-python-debug
