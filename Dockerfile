@@ -14,10 +14,10 @@ COPY requirements.txt .
 RUN curl https://sh.rustup.rs -sSf -o install-rust.sh
 RUN sh install-rust.sh -q -y
 RUN export PATH="$HOME/.cargo/bin:$PATH"
-RUN python -m pip install -r requirements.txt
+RUN python -m pip install --user -r requirements.txt
 
 FROM python:3.10.5-slim-bullseye as build-image
-COPY --from=compile-image /root/.local /root/.local
+COPY --from=compile-image /app/.local /app/.local
 
 WORKDIR /app
 COPY . /app
