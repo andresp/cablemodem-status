@@ -11,6 +11,7 @@ from influxdb_client import Point
 class TouchstoneTG3492UPCCH(ObservableModem):
     baseUrl = ""
     session = None
+    loggedIn = False
 
     def __init__(self, config, dbClient, logger):
         self.baseUrl = "http://" + config['Modem']['Host']
@@ -80,6 +81,9 @@ class TouchstoneTG3492UPCCH(ObservableModem):
     def login(self):
         self.logger.info("Logging into modem")
 
+        if self.loggedIn:
+            return
+
         try:
             self.browser.get(self.baseUrl)
 
@@ -100,6 +104,7 @@ class TouchstoneTG3492UPCCH(ObservableModem):
                 EC.presence_of_element_located((By.ID, "RouterStatus_div"))
             )
             self.logger.info("Login successful")
+            self.loggedIn = True
         except:
             self.browser.quit()
 

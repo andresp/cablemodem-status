@@ -35,7 +35,11 @@ class CustomTimestampFilter(logging.Filter):
         return True
 
 @catch_exceptions(cancel_on_failure=False)
-def collectionJob(modem):
+def collectionJob():
+
+    modem = modems[config['General']['ModemType']]
+
+    modem.login()
 
     modem.collectStatus()
 
@@ -98,17 +102,14 @@ modems = {
 # Because the modem uses a self-signed certificate and this is expected, disabling the warning to reduce noise.
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
-modem = modems[config['General']['ModemType']]
-modem.login()
-
 if runAsDaemon:
-    collectionJob(modem)
+    collectionJob()
     consoleLogger.info("Running as daemon")
-    schedule.every(runEveryMinutes).minutes.do(collectionJob, modem)
+    schedule.every(runEveryMinutes).minutes.do(collectionJob)
 
     while 1:
         schedule.run_pending()
         time.sleep(1)
 else:
     consoleLogger.info("One-time execution")
-    collectionJob(modem)
+    collectionJob()
