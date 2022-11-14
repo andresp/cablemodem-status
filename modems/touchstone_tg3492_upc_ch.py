@@ -19,10 +19,8 @@ class TouchstoneTG3492UPCCH(ObservableModem):
         logger.info("Connecting to Selenium remote")
  
         seleniumUri = config['General'].get("SeleniumUri")
-        if seleniumUri is None:
-            seleniumUri = "http://localhost:4444/wd/hub"
- 
-        self.browser = Remote(seleniumUri, DesiredCapabilities.CHROME)
+        if seleniumUri is not None:
+            self.browser = Remote(seleniumUri, DesiredCapabilities.CHROME)
 
         super(TouchstoneTG3492UPCCH, self).__init__(config, dbClient, logger)
 
