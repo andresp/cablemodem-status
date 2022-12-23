@@ -1,5 +1,5 @@
 # For more information, please refer to https://aka.ms/vscode-docker-python
-FROM python:3.10.9-bullseye AS compile-image
+FROM python:3.11.1-bullseye AS compile-image
 
 # Keeps Python from generating .pyc files in the container
 ENV PYTHONDONTWRITEBYTECODE=1
@@ -12,13 +12,9 @@ ENV PIP_DISABLE_PIP_VERSION_CHECK=1
 # Install pip requirements
 COPY requirements.txt .
 
-RUN curl https://sh.rustup.rs -sSf -o install-rust.sh
-RUN sh install-rust.sh -q -y
-ENV PATH="/root/.cargo/bin:${PATH}"
+RUN python -m pip install --user -r requirements.txt --no-warn-script-location
 
-RUN python -m pip install --user -r requirements.txt
-
-FROM python:3.10.9-slim-bullseye as build-image
+FROM python:3.11.1-slim-bullseye as build-image
 WORKDIR /app
 COPY --from=compile-image /root/.local /app/.local
 
