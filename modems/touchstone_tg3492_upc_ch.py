@@ -114,7 +114,8 @@ class TouchstoneTG3492UPCCH(ObservableModem):
             )
             self.logger.info("Login successful")
             self.loggedIn = True
-        except:
+        except Exception as ex:
+            self.logger.error("Failed to log in: '%s'.", exc_info=ex)
             self.browser.quit()
 
     def collectStatus(self):

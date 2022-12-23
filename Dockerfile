@@ -1,5 +1,5 @@
 # For more information, please refer to https://aka.ms/vscode-docker-python
-FROM python:3.10.5-bullseye AS compile-image
+FROM python:3.10.9-bullseye AS compile-image
 
 # Keeps Python from generating .pyc files in the container
 ENV PYTHONDONTWRITEBYTECODE=1
@@ -18,7 +18,7 @@ ENV PATH="/root/.cargo/bin:${PATH}"
 
 RUN python -m pip install --user -r requirements.txt
 
-FROM python:3.10.5-slim-bullseye as build-image
+FROM python:3.10.9-slim-bullseye as build-image
 WORKDIR /app
 COPY --from=compile-image /root/.local /app/.local
 

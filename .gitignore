@@ -138,3 +138,5 @@ dmypy.json
 cython_debug/
 cablemodem-status.last
 data/configuration.ini
+
+.kube/
