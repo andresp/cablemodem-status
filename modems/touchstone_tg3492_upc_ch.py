@@ -106,7 +106,7 @@ class TouchstoneTG3492UPCCH(ObservableModem):
                 EC.presence_of_element_located((By.ID, "AdvancedSettings"))
             )
 
-            self.logger.info("Getting modem status")
+            self.logger.info("Navigating to modem status")
             self.browser.get(self.baseUrl + "?device_networkstatus&mid=NetworkStatus")
 
             WebDriverWait(self.browser, 60).until(
