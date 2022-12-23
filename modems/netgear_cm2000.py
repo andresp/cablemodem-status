@@ -51,7 +51,7 @@ class NetgearCM2000(ObservableModem):
                 .tag("lockStatus", row[1]) \
                 .tag("usChannelType", row[2]) \
                 .tag("channelId", int(row[3])) \
-                .tag("symbolRate", int(row[4])) \
+                .tag("symbolRate", int(row[4].split()[0])) \
                 .tag("frequency", row[5]) \
                 .time(sampleTime) \
                 .field("power", float(row[6].split()[0]))
