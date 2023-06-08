@@ -11,21 +11,18 @@ from influxdb_client import Point
 class TouchstoneTG3492UPCCH(ObservableModem):
     baseUrl = ""
     session = None
+    seleniumUri = None
     loggedIn = False
 
     def __init__(self, config, dbClient, logger):
         self.baseUrl = "http://" + config['Modem']['Host']
-
-        logger.info("Connecting to Selenium remote")
- 
-        seleniumUri = config['General'].get("SeleniumUri")
-        if seleniumUri is not None:
-            self.browser = Remote(seleniumUri, DesiredCapabilities.CHROME)
+        self.seleniumUri = config['General'].get("SeleniumUri")
 
         super(TouchstoneTG3492UPCCH, self).__init__(config, dbClient, logger)
 
     def __del__(self):
-        self.browser.quit()
+        if self.browser is not None:
+            self.browser.quit()
 
     def formatUpstreamPoints(self, data, errorData, sampleTime):
         points = []
@@ -115,6 +112,13 @@ class TouchstoneTG3492UPCCH(ObservableModem):
 
     def login(self):
         self.logger.info("Logging into modem")
+
+        if self.browser is None:
+            if self.seleniumUri is None:
+                raise ValueError("Must configure a value for General->SeleniumUri.")
+
+            self.logger.info("Connecting to Selenium remote")
+            self.browser = Remote(self.seleniumUri, DesiredCapabilities.CHROME)
 
         try:
             passwordInput = self.browser.find_element(By.ID, 'cableModemStatus')
