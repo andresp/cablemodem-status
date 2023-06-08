@@ -2,11 +2,10 @@ from .observable_modem import ObservableModem
 from bs4 import BeautifulSoup
 from datetime import datetime
 import logging
-import os
-import pytz
-import re
+
 import requests
 from influxdb_client import Point
+import base64
 
 class MotorolaMB8600(ObservableModem):
     baseUrl = ""
@@ -79,7 +78,7 @@ class MotorolaMB8600(ObservableModem):
 
         modemAuthentication = {
             'loginUsername': self.config['Modem']['Username'],
-            'loginPassword': self.config['Modem']['Password']
+            'loginPassword': base64.b64encode(self.config['Modem']['Password'].encode('ascii'))
         }
         loginUrl = "/goform/login"
 
