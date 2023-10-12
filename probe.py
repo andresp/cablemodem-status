@@ -13,7 +13,7 @@ class Probe():
         self.runEveryMinutes = runEveryMinutes
 
     def liveness(self):
-        if datetime.datetime.now() - self.runner.lastCompletedTime() < datetime.timedelta(minutes=self.runEveryMinutes):
+        if datetime.datetime.now() - self.runner.lastCompletedTime() < datetime.timedelta(minutes=self.runEveryMinutes * 2):
             pass
         else:
             raise HealthError("Health check did not pass.")
