@@ -1,52 +1,55 @@
-from bs4 import BeautifulSoup
 import configparser
-import functools
+import threading
 from influxdb_client import InfluxDBClient
 import logging
 import logging_loki
-import pytz
-import requests
 from requests.packages import urllib3
 import schedule
 import time
+from collectionJob import collectionJob
 from modems.netgear_cm2000 import NetgearCM2000
 from modems.technicolor_xb7 import TechnicolorXB7
 from modems.motorola_mb8600 import MotorolaMB8600
 from modems.touchstone_tg3492_upc_ch import TouchstoneTG3492UPCCH
 
-def catch_exceptions(cancel_on_failure=False):
-    def catch_exceptions_decorator(job_func):
-        @functools.wraps(job_func)
-        def wrapper(*args, **kwargs):
-            try:
-                return job_func(*args, **kwargs)
-            except:
-                import traceback
-                print(traceback.format_exc())
-                if cancel_on_failure:
-                    return schedule.CancelJob
-        return wrapper
-    return catch_exceptions_decorator
+from flask import Flask
+from flask_healthz import healthz
+
+from probe import Probe
+
+
+def runDaemon():
+    jobRunner.collectionJob()
+    consoleLogger.info("Running as daemon")
+    schedule.every(runEveryMinutes).minutes.do(jobRunner.collectionJob)
+
+    while 1:
+        schedule.run_pending()
+        time.sleep(1)
+
+
+def create_flask_app(runner):
+
+    if enableHealthProbe is True:
+        app = Flask(__name__)
+        app.register_blueprint(healthz, url_prefix="/healthz")
+
+        probe = Probe(runner, runEveryMinutes)
+
+        app.config.update(
+            HEALTHZ = {
+                "live": probe.liveness,
+                "ready": lambda: None,
+            }
+        )
+
+        app.run(host='0.0.0.0', port=80, debug=False, use_reloader=False) 
 
 class CustomTimestampFilter(logging.Filter):
     def filter(self, record):
         if hasattr(record, 'timestamp'):
             record.created = record.timestamp
         return True
-
-@catch_exceptions(cancel_on_failure=False)
-def collectionJob():
-
-    modem = modems[config['General']['ModemType']]
-
-    modem.login()
-
-    modem.collectStatus()
-
-    if collectLogs:
-        modem.collectLogs()
-
-    consoleLogger.info("Done collecting status and logs")
 
 # Init logger
 logging.basicConfig(level=logging.INFO)
@@ -64,14 +67,15 @@ influxPort = config['Database']['Port']
 influxToken = config['Database']['Token']
 influxUseTLS = bool(config['Database']['UseTls'])
 
-collectLogs = config['Modem'].getboolean('CollectLogs')
-
 lokiUrl = config['Loki']['Url']
 lokiUsername = config['Loki']['Username']
 lokiPassword = config['Loki']['Password']
 
 runAsDaemon = config['General'].getboolean('Daemon')
+enableHealthProbe = config['General'].getboolean('EnableK8sProbe')
 runEveryMinutes = int(config['General']['RunEveryMinutes'])
+
+lastUpdated = 0
 
 consoleLogger.info("Connecting to InfluxDB")
 
@@ -99,17 +103,15 @@ modems = {
     "TouchstoneTG3492UPCCH": TouchstoneTG3492UPCCH(config, dbClient, consoleLogger)
 }
 
+jobRunner = collectionJob(modems[config['General']['ModemType']], config['Modem'].getboolean('CollectLogs'), consoleLogger)
+
 # Because the modem uses a self-signed certificate and this is expected, disabling the warning to reduce noise.
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 if runAsDaemon:
-    collectionJob()
-    consoleLogger.info("Running as daemon")
-    schedule.every(runEveryMinutes).minutes.do(collectionJob)
-
-    while 1:
-        schedule.run_pending()
-        time.sleep(1)
+    runnerThread = threading.Thread(target=runDaemon, daemon=True)
+    runnerThread.start()
+    create_flask_app(jobRunner)
 else:
     consoleLogger.info("One-time execution")
-    collectionJob()
+    jobRunner.collectionJob()
