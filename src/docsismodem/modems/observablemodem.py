@@ -1,5 +1,6 @@
-from abc import ABC, abstractmethod, abstractproperty
-from influxdb_client.client.write_api import SYNCHRONOUS
+from abc import ABC, abstractmethod
+
+from docsismodem.storage.timeserieswriterfactory import TimeseriesWriterFactory
 
 class ObservableModem(ABC):
 
@@ -8,9 +9,9 @@ class ObservableModem(ABC):
     logger = None
     logTimeZone = ""
     influxBucket = ""
-    writeApi = None
+    timeseriesWriter = None
 
-    def __init__(self, config, dbClient, logger):
+    def __init__(self, config, logger):
         self.config = config
         self.logger = logger
 
@@ -18,7 +19,7 @@ class ObservableModem(ABC):
         self.hostTimeZone = config['General']['HostTimezone']
         self.influxBucket = config['Database']['Bucket']
 
-        self.write_api = dbClient.write_api(write_options=SYNCHRONOUS)
+        self.timeseriesWriter = TimeseriesWriterFactory.get(type="InfluxDB", config=config)
 
         super().__init__()
 

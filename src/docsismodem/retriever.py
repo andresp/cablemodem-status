@@ -6,10 +6,7 @@ import logging_loki
 from requests.packages import urllib3
 import schedule
 import time
-from docsismodem.modems.netgear_cm2000 import NetgearCM2000
-from docsismodem.modems.technicolor_xb7 import TechnicolorXB7
-from docsismodem.modems.motorola_mb8600 import MotorolaMB8600
-from docsismodem.modems.touchstone_tg3492_upc_ch import TouchstoneTG3492UPCCH
+from docsismodem.modems.observablemodemfactory import ObservableModemFactory
 
 from flask import Flask
 from flask_healthz import healthz
@@ -35,16 +32,9 @@ def main():
 
     influxUrl =  ("https" if influxUseTLS else "http") + "://" + influxHost + ":" + influxPort
 
-    dbClient = InfluxDBClient(url=influxUrl, org=influxOrg, token=influxToken, ssl=influxUseTLS)
+    modem = ObservableModemFactory.get(config['General']['ModemType'], config, consoleLogger)
 
-    modems = {
-        "MotorolaMB8600": MotorolaMB8600(config, dbClient, consoleLogger),
-        "NetgearCM2000": NetgearCM2000(config, dbClient, consoleLogger),
-        "TechnicolorXB7": TechnicolorXB7(config, dbClient, consoleLogger),
-        "TouchstoneTG3492UPCCH": TouchstoneTG3492UPCCH(config, dbClient, consoleLogger)
-    }
-
-    jobRunner = collectionJob(modems[config['General']['ModemType']], config['Modem'].getboolean('CollectLogs'), consoleLogger)
+    jobRunner = collectionJob(modem, config['Modem'].getboolean('CollectLogs'), consoleLogger)
 
     # Because the modem uses a self-signed certificate and this is expected, disabling the warning to reduce noise.
     urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
