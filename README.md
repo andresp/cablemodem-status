@@ -17,13 +17,9 @@ This script retrieves channel information from a cable modem and stores time ser
 
 ## Installation
 
-Install the following packages with pip
+Build and install with pip
 
-`pip3 install requests beautifulsoup4 influxdb schedule`
-
-Optionally, for log collection:
-
-`pip3 install python-logging-loki`
+`pip3 install -e .`
 
 ## Configuration
 
@@ -40,13 +36,13 @@ Valid strings for `ModemType`:
 
 Test the script by executing it manually and verify it completes without error messages.
 
-`python3 retriever.py`
+`retriever`
 
 ## Set up recurring execution
 
 Create a cron job (executes every 2 minutes):
 
-`*/2 * * * * /usr/bin/python3 /opt/cm-status/retriever.py 2>&1 > /dev/null`
+`*/2 * * * * /usr/local/bin/retriever 2>&1 > /dev/null`
 
 ## Docker
 

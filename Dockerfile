@@ -10,19 +10,26 @@ ENV PYTHONUNBUFFERED=1
 ENV PIP_DISABLE_PIP_VERSION_CHECK=1
 
 # Install pip requirements
-COPY requirements.txt .
+COPY . .
 
-RUN python -m pip install --user -r requirements.txt --no-warn-script-location
+RUN python3.11 -m venv /app/venv
+ENV PATH=/app/venv/bin:$PATH
+RUN /app/venv/bin/pip3 install build
+RUN /app/venv/bin/python -m build --wheel
+RUN /app/venv/bin/pip3 install dist/*.whl
 
 FROM python:3.11-slim-bullseye as build-image
 WORKDIR /app
-COPY --from=compile-image /root/.local /app/.local
-
-COPY . /app
+COPY --from=compile-image /app/venv /app/venv
 
 # Switching to a non-root user, please refer to https://aka.ms/vscode-docker-python-user-rights
 RUN useradd -d /app appuser && chown -R appuser /app
 USER appuser
 
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+ENV VIRTUAL_ENV=/app/venv
+ENV PATH="/app/venv/bin:$PATH"
+
 # During debugging, this entry point will be overridden. For more information, please refer to https://aka.ms/vscode-docker-python-debug
-CMD ["python", "retriever.py"]
+CMD ["retriever"]
