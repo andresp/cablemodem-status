@@ -1,4 +1,3 @@
-from .observable_modem import ObservableModem
 from bs4 import BeautifulSoup
 from datetime import datetime
 import logging
@@ -6,6 +5,8 @@ import logging
 import requests
 from influxdb_client import Point
 import base64
+
+from docsismodem.modems.observablemodem import ObservableModem
 
 class MotorolaMB8600(ObservableModem):
     baseUrl = ""
@@ -18,12 +19,12 @@ class MotorolaMB8600(ObservableModem):
         6: logging.INFO
     }
 
-    def __init__(self, config, dbClient, logger):
+    def __init__(self, config, logger):
         self.hostname = config['Modem']['Host']
         self.baseUrl = "http://" + self.hostname
         self.session = requests.Session()
 
-        super(MotorolaMB8600, self).__init__(config, dbClient, logger)
+        super(MotorolaMB8600, self).__init__(config, logger)
 
     def formatUpstreamPoints(self, data, sampleTime):
         points = []
@@ -101,8 +102,8 @@ class MotorolaMB8600(ObservableModem):
         upstreamPoints = self.formatUpstreamPoints(upstreamData, sampleTime)
 
         # Store data to InfluxDB
-        self.write_api.write(bucket=self.influxBucket, record=downstreamPoints)
-        self.write_api.write(bucket=self.influxBucket, record=upstreamPoints)
+        self.timeseriesWriter.write(record=downstreamPoints)
+        self.timeseriesWriter.write(record=upstreamPoints)
 
     def collectLogs(self):
         # Not implemented yet

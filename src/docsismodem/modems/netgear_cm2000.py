@@ -1,4 +1,4 @@
-from .observable_modem import ObservableModem
+from .observablemodem import ObservableModem
 from bs4 import BeautifulSoup
 from datetime import datetime
 import logging
@@ -21,12 +21,12 @@ class NetgearCM2000(ObservableModem):
 
     lastRunFilename = "data/cablemodem-status.last"
 
-    def __init__(self, config, dbClient, logger):
+    def __init__(self, config, logger):
         self.hostname = config['Modem']['Host']
         self.baseUrl = "https://" + self.hostname
         self.session = requests.Session()
 
-        super(NetgearCM2000, self).__init__(config, dbClient, logger)
+        super(NetgearCM2000, self).__init__(config, logger)
 
     def parseDelimitedTagValue(self, tagValue, noTrailingPipe = False):
         dataRowCountIndex = tagValue.index("|")
@@ -166,10 +166,10 @@ class NetgearCM2000(ObservableModem):
             downstreamOFDMPoints = self.formatDownstreamOFDMPoints(downstreamOFDMChannels, sampleTime)
 
             # Store data to InfluxDB
-            self.write_api.write(bucket=self.influxBucket, record=upstreamQamPoints)
-            self.write_api.write(bucket=self.influxBucket, record=downstreamQamPoints)
-            self.write_api.write(bucket=self.influxBucket, record=upstreamOFDMAPoints)
-            self.write_api.write(bucket=self.influxBucket, record=downstreamOFDMPoints)
+            self.timeseriesWriter.write(record=upstreamQamPoints)
+            self.timeseriesWriter.write(record=downstreamQamPoints)
+            self.timeseriesWriter.write(record=upstreamOFDMAPoints)
+            self.timeseriesWriter.write(record=downstreamOFDMPoints)
 
     def writeLastRuntime(self):
         if os.path.exists(self.lastRunFilename):

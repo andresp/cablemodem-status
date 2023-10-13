@@ -1,4 +1,4 @@
-from .observable_modem import ObservableModem
+from .observablemodem import ObservableModem
 from bs4 import BeautifulSoup
 from datetime import datetime
 from selenium.webdriver import Remote
@@ -14,11 +14,11 @@ class TouchstoneTG3492UPCCH(ObservableModem):
     seleniumUri = None
     loggedIn = False
 
-    def __init__(self, config, dbClient, logger):
+    def __init__(self, config, logger):
         self.baseUrl = "http://" + config['Modem']['Host']
         self.seleniumUri = config['General'].get("SeleniumUri")
 
-        super(TouchstoneTG3492UPCCH, self).__init__(config, dbClient, logger)
+        super(TouchstoneTG3492UPCCH, self).__init__(config, logger)
 
     def __del__(self):
         if self.browser is not None:
@@ -187,9 +187,9 @@ class TouchstoneTG3492UPCCH(ObservableModem):
         upstreamPoints = self.formatUpstreamPoints(upstreamData, upstreamErrorData, sampleTime)
 
         # Store data to InfluxDB
-        self.write_api.write(bucket=self.influxBucket, record=downstreamPoints)
-        self.write_api.write(bucket=self.influxBucket, record=downstreamOfdmPoints)
-        self.write_api.write(bucket=self.influxBucket, record=upstreamPoints)
+        self.timeseriesWriter.write(record=downstreamPoints)
+        self.timeseriesWriter.write(record=downstreamOfdmPoints)
+        self.timeseriesWriter.write(record=upstreamPoints)
 
     def collectLogs(self):
         # Not implemented yet
