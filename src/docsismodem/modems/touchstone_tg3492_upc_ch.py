@@ -13,6 +13,7 @@ class TouchstoneTG3492UPCCH(ObservableModem):
     session = None
     seleniumUri = None
     loggedIn = False
+    browser = None
 
     def __init__(self, config, logger):
         self.baseUrl = "http://" + config['Modem']['Host']
