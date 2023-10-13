@@ -8,7 +8,7 @@
             "name": "Python: Main",
             "type": "python",
             "request": "launch",
-            "program": "docsismodem/retriever.py",
+            "program": "src/docsismodem/retriever.py",
             "console": "integratedTerminal",
             "justMyCode": true
         }
