@@ -2,8 +2,7 @@ import datetime
 import functools
 from logging import Logger
 from sched import scheduler
-
-from modems.observable_modem import ObservableModem
+from docsismodem.modems.observable_modem import ObservableModem
 
 class collectionJob():
 
