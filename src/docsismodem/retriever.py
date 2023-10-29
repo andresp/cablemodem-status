@@ -44,15 +44,20 @@ def main():
         consoleLogger.info("Running as daemon")
         schedule.every(runEveryMinutes).minutes.do(jobRunner.collectionJob)
 
+        if enableHealthProbe is True:
+            while 1:
+                schedule.run_pending()
+                time.sleep(1)
+ 
     if runAsDaemon:
         runnerThread = threading.Thread(target=runDaemon, daemon=True)
         runnerThread.start()
         if enableHealthProbe is True:
             create_flask_app(jobRunner)
-            
-        while 1:
-            schedule.run_pending()
-            time.sleep(1)
+        else:
+            while 1:
+                schedule.run_pending()
+                time.sleep(1)
     else:
         consoleLogger.info("One-time execution")
         jobRunner.collectionJob()
