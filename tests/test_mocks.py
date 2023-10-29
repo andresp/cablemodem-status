@@ -3,15 +3,17 @@ config = {
         'Bucket': 'testBucket',
         'Org': 'org',
         'Host': 'localhost',
-        'Port': '443',
-        'UseTls': True,
+        'Port': '5000',
+        'UseTls': False,
         'Token': 'token'
     },
     'General': {
         'HostTimezone': 'Pacific/Los_Angeles'
     },
     'Modem': {
-        'Host': '10.0.0.1',
-        'LogTimezone': 'Pacific/Los_Angeles'
+        'Host': 'localhost:5000',
+        'LogTimezone': 'Pacific/Los_Angeles',
+        'Username': 'admin',
+        'Password': 'password'
     }
 }

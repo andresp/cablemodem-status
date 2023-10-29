@@ -1,3 +1,4 @@
+from docsismodem.exceptions import ModemConnectionError, ModemCredentialsError
 from .observablemodem import ObservableModem
 from bs4 import BeautifulSoup
 from datetime import datetime
@@ -90,8 +91,22 @@ class TechnicolorXB7(ObservableModem):
             'password': self.config['Modem']['Password']
         }
         loginUrl = "/check.jst"
-
-        self.session.post(self.baseUrl + loginUrl, data=modemAuthentication)
+        
+        try:
+            response = self.session.post(self.baseUrl + loginUrl, data=modemAuthentication)
+            if response.status_code == 200:
+                # 200 indicates a login failure
+                msg = "Invalid login credentials"
+                logging.error(msg)
+                raise ModemCredentialsError(msg)
+        except requests.ConnectionError as e:
+            msg = 'Could not connect to modem.'
+            logging.error(msg)
+            raise ModemConnectionError(msg)
+        except requests.exceptions.Timeout:
+            msg = 'Connection to modem timed out.'
+            logging.error(msg)
+            raise ModemConnectionError(msg)
 
     def collectStatus(self):
         self.logger.info("Getting modem status")

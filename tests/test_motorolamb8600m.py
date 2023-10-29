@@ -3,7 +3,7 @@ from docsismodem.modems.motorola_mb8600 import MotorolaMB8600
 from docsismodem.modems.observablemodem import ObservableModem
 from docsismodem.modems.observablemodemfactory import ObservableModemFactory
 
-from tests.mocks import config
+from tests.test_mocks import config
 
 class TestMotorolaMB8600:
 
