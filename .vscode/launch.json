@@ -10,7 +10,7 @@
             "request": "launch",
             "program": "src/docsismodem/retriever.py",
             "console": "integratedTerminal",
-            "justMyCode": true
+            "justMyCode": false
         }
     ]
 }

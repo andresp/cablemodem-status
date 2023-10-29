@@ -3,7 +3,7 @@ from docsismodem.modems.netgear_cm2000 import NetgearCM2000
 from docsismodem.modems.observablemodem import ObservableModem
 from docsismodem.modems.observablemodemfactory import ObservableModemFactory
 
-from tests.mocks import config
+from tests.test_mocks import config
 
 class TestNetgear2000:
 
