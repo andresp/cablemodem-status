@@ -20,14 +20,14 @@ class TestTechnicolorXB7:
     @responses.activate
     def test_succcessful_login(self):
 
-        responses.add(responses.POST, 'http://localhost:5000/check.jst', json={}, status=302)
+        responses.add(responses.POST, f'http://{config["Modem"]["Host"]}/check.jst', json={}, status=302)
         
         instance = ObservableModemFactory.get("TechnicolorXB7", config, logging.getLogger(None))
         instance.login()
 
     @responses.activate
     def test_invalid_login(self):
-        responses.add(responses.POST, 'http://localhost:5000/check.jst', json={}, status=200)
+        responses.add(responses.POST, f'http://{config["Modem"]["Host"]}/check.jst', json={}, status=200)
         
         instance = ObservableModemFactory.get("TechnicolorXB7", config, logging.getLogger(None))
         with pytest.raises(ModemCredentialsError):
