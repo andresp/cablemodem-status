@@ -38,6 +38,12 @@ Test the script by executing it manually and verify it completes without error m
 
 `retriever`
 
+## Development / Contributing
+
+Install all dev dependencies: `pip install .[dev]` .
+
+Run unittests: `pytest tests`
+
 ## Set up recurring execution
 
 Create a cron job (executes every 2 minutes):
