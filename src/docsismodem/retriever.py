@@ -44,14 +44,15 @@ def main():
         consoleLogger.info("Running as daemon")
         schedule.every(runEveryMinutes).minutes.do(jobRunner.collectionJob)
 
-        while 1:
-            schedule.run_pending()
-            time.sleep(1)
-
     if runAsDaemon:
         runnerThread = threading.Thread(target=runDaemon, daemon=True)
         runnerThread.start()
-        create_flask_app(jobRunner)
+        if enableHealthProbe is True:
+            create_flask_app(jobRunner)
+            
+        while 1:
+            schedule.run_pending()
+            time.sleep(1)
     else:
         consoleLogger.info("One-time execution")
         jobRunner.collectionJob()
@@ -60,20 +61,19 @@ def main():
 
 def create_flask_app(runner):
 
-    if enableHealthProbe is True:
-        app = Flask(__name__)
-        app.register_blueprint(healthz, url_prefix="/healthz")
+    app = Flask(__name__)
+    app.register_blueprint(healthz, url_prefix="/healthz")
 
-        probe = Probe(runner, runEveryMinutes)
+    probe = Probe(runner, runEveryMinutes)
 
-        app.config.update(
-            HEALTHZ = {
-                "live": probe.liveness,
-                "ready": lambda: None,
-            }
-        )
+    app.config.update(
+        HEALTHZ = {
+            "live": probe.liveness,
+            "ready": lambda: None,
+        }
+    )
 
-        app.run(host='0.0.0.0', port=80, debug=False, use_reloader=False) 
+    app.run(host='0.0.0.0', port=80, debug=False, use_reloader=False) 
 
 class CustomTimestampFilter(logging.Filter):
     def filter(self, record):
