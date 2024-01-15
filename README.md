@@ -23,7 +23,7 @@ Build and install with pip
 
 ## Configuration
 
-Edit [configuration.ini](./configuration.ini) and fill in your information for the InfluxDB and the modem.
+Edit [configuration.ini](./data/configuration.ini) and fill in your information for the InfluxDB and the modem.
 
 Valid strings for `ModemType`:
 
