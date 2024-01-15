@@ -74,13 +74,13 @@ Assuming your configuration file is
 
 then all you need to add to your compose.yaml file is this:
 
-`
+```
   cablemodem_exporter:
      build: https://github.com/andresp/cablemodem-status.git
      command: retriever
      volumes:
        - /home/pi/config:/app/data:ro
-`
+```
 
 ## Todo
 
