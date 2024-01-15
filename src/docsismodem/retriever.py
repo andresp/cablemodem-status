@@ -100,7 +100,7 @@ influxOrg = config['Database']['Org']
 influxHost = config['Database']['Host']
 influxPort = config['Database']['Port']
 influxToken = config['Database']['Token']
-influxUseTLS = bool(config['Database']['UseTls'])
+influxUseTLS = config['Database'].getboolean('UseTls')
 
 lokiUrl = config['Loki']['Url']
 lokiUsername = config['Loki']['Username']
