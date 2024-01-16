@@ -1,18 +1,17 @@
 import configparser
 import threading
-from influxdb_client import InfluxDBClient
 import logging
 import logging_loki
 from requests.packages import urllib3
 import schedule
 import time
-from docsismodem.modems.observablemodemfactory import ObservableModemFactory
+from modems.observablemodemfactory import ObservableModemFactory
 
 from flask import Flask
 from flask_healthz import healthz
 
-from docsismodem.probe import Probe
-from docsismodem.collectionJob import collectionJob
+from probe import Probe
+from collectionJob import collectionJob
 
 def main():
     consoleLogger.info("Connecting to InfluxDB")

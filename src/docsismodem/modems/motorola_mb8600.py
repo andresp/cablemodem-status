@@ -6,7 +6,7 @@ import requests
 from influxdb_client import Point
 import base64
 
-from docsismodem.modems.observablemodem import ObservableModem
+from .observablemodem import ObservableModem
 
 class MotorolaMB8600(ObservableModem):
     baseUrl = ""
