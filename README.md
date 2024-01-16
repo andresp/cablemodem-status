@@ -89,3 +89,4 @@ then all you need to add to your compose.yaml file is this:
   * Arris SB8200
 * Provide a Grafana Dashboard to visualize collected data
 * Provide turnkey instructions to set up InfluxDB, Grafana and retrieval script
+* Create Prometheus storage writer
