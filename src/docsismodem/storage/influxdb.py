@@ -15,7 +15,7 @@ class InfluxDB(TimeseriesWriter):
 
         self.logger = logging.getLogger("influxdb")
 
-        self.logger.info("Connecting to InfluxDB")
+        self.logger.info("Connecting to InfluxDB " + url + ", org: " + org + ". Using TLS? " + str(useTls))
         self.dbClient = InfluxDBClient(url=url, org=org, token=token, ssl=useTls)
 
         return
