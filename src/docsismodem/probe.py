@@ -1,6 +1,6 @@
 import datetime
 from flask_healthz import HealthError
-from collectionJob import collectionJob
+from .collectionJob import collectionJob
 
 
 class Probe():

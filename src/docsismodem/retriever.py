@@ -5,13 +5,13 @@ import logging_loki
 from requests.packages import urllib3
 import schedule
 import time
-from modems.observablemodemfactory import ObservableModemFactory
+from .modems.observablemodemfactory import ObservableModemFactory
 
 from flask import Flask
 from flask_healthz import healthz
 
-from probe import Probe
-from collectionJob import collectionJob
+from .probe import Probe
+from .collectionJob import collectionJob
 
 def main():
     consoleLogger.info("Connecting to InfluxDB")
