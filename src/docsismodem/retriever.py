@@ -30,8 +30,6 @@ def main():
     logger.addHandler(handler)
     logger.addFilter(filter)
 
-    influxUrl =  ("https" if influxUseTLS else "http") + "://" + influxHost + ":" + influxPort
-
     modem = ObservableModemFactory.get(config['General']['ModemType'], config, consoleLogger)
 
     jobRunner = collectionJob(modem, config['Modem'].getboolean('CollectLogs'), consoleLogger)
@@ -95,12 +93,6 @@ consoleLogger.info("Reading configuration")
 
 config = configparser.ConfigParser()
 config.read('data/configuration.ini')
-
-influxOrg = config['Database']['Org']
-influxHost = config['Database']['Host']
-influxPort = config['Database']['Port']
-influxToken = config['Database']['Token']
-influxUseTLS = config['Database'].getboolean('UseTls')
 
 lokiUrl = config['Loki']['Url']
 lokiUsername = config['Loki']['Username']
