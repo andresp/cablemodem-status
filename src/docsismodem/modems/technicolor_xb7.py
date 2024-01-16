@@ -1,13 +1,11 @@
-from docsismodem.exceptions import ModemConnectionError, ModemCredentialsError
+from ..exceptions import ModemConnectionError, ModemCredentialsError
 from .observablemodem import ObservableModem
 from bs4 import BeautifulSoup
 from datetime import datetime
 import logging
-import os
-import pytz
-import re
 import requests
 from influxdb_client import Point
+from urllib.parse import urlparse
 
 class TechnicolorXB7(ObservableModem):
     baseUrl = ""
@@ -94,7 +92,7 @@ class TechnicolorXB7(ObservableModem):
         
         try:
             response = self.session.post(self.baseUrl + loginUrl, data=modemAuthentication)
-            if response.status_code == 200:
+            if response.status_code == 200 and "/at_a_glance.jst" not in urlparse(response.url).path:
                 # 200 indicates a login failure
                 msg = "Invalid login credentials"
                 logging.error(msg)
