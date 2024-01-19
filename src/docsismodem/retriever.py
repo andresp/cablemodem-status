@@ -1,18 +1,17 @@
 import configparser
 import threading
-from influxdb_client import InfluxDBClient
 import logging
 import logging_loki
 from requests.packages import urllib3
 import schedule
 import time
-from docsismodem.modems.observablemodemfactory import ObservableModemFactory
+from .modems.observablemodemfactory import ObservableModemFactory
 
 from flask import Flask
 from flask_healthz import healthz
 
-from docsismodem.probe import Probe
-from docsismodem.collectionJob import collectionJob
+from .probe import Probe
+from .collectionJob import collectionJob
 
 def main():
     consoleLogger.info("Connecting to InfluxDB")
@@ -30,8 +29,6 @@ def main():
     logger.addHandler(handler)
     logger.addFilter(filter)
 
-    influxUrl =  ("https" if influxUseTLS else "http") + "://" + influxHost + ":" + influxPort
-
     modem = ObservableModemFactory.get(config['General']['ModemType'], config, consoleLogger)
 
     jobRunner = collectionJob(modem, config['Modem'].getboolean('CollectLogs'), consoleLogger)
@@ -44,15 +41,20 @@ def main():
         consoleLogger.info("Running as daemon")
         schedule.every(runEveryMinutes).minutes.do(jobRunner.collectionJob)
 
+        if enableHealthProbe is True:
+            while 1:
+                schedule.run_pending()
+                time.sleep(1)
+ 
     if runAsDaemon:
         runnerThread = threading.Thread(target=runDaemon, daemon=True)
         runnerThread.start()
         if enableHealthProbe is True:
             create_flask_app(jobRunner)
-            
-        while 1:
-            schedule.run_pending()
-            time.sleep(1)
+        else:
+            while 1:
+                schedule.run_pending()
+                time.sleep(1)
     else:
         consoleLogger.info("One-time execution")
         jobRunner.collectionJob()
@@ -90,12 +92,6 @@ consoleLogger.info("Reading configuration")
 
 config = configparser.ConfigParser()
 config.read('data/configuration.ini')
-
-influxOrg = config['Database']['Org']
-influxHost = config['Database']['Host']
-influxPort = config['Database']['Port']
-influxToken = config['Database']['Token']
-influxUseTLS = bool(config['Database']['UseTls'])
 
 lokiUrl = config['Loki']['Url']
 lokiUsername = config['Loki']['Username']

@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from docsismodem.storage.timeserieswriterfactory import TimeseriesWriterFactory
+from ..storage.timeserieswriterfactory import TimeseriesWriterFactory
 
 class ObservableModem(ABC):
 
@@ -8,7 +8,6 @@ class ObservableModem(ABC):
     hostTimeZone = ""
     logger = None
     logTimeZone = ""
-    influxBucket = ""
     timeseriesWriter = None
 
     def __init__(self, config, logger):
@@ -17,7 +16,6 @@ class ObservableModem(ABC):
 
         self.logTimeZone = config['Modem']['LogTimezone']
         self.hostTimeZone = config['General']['HostTimezone']
-        self.influxBucket = config['Database']['Bucket']
 
         self.timeseriesWriter = TimeseriesWriterFactory.get(type="InfluxDB", config=config)
 

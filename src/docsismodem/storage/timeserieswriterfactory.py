@@ -12,7 +12,7 @@ class TimeseriesWriterFactory():
                 port = config['Database']['Port']
                 token = config['Database']['Token']
                 bucket = config['Database']['Bucket']
-                useTls = bool(config['Database']['UseTls'])
+                useTls = config['Database'].getboolean('UseTls')
                 url =  ("https" if useTls else "http") + "://" + host + ":" + port
 
                 return InfluxDB(url, org, token, bucket, useTls)
