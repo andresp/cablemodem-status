@@ -8,6 +8,7 @@ __pycache__/
 
 # Distribution / packaging
 .Python
+bin/
 build/
 develop-eggs/
 dist/
@@ -140,3 +141,5 @@ cablemodem-status.last
 data/configuration.ini
 
 .kube/
+
+Scripts/
