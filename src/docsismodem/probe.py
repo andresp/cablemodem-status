@@ -1,14 +1,13 @@
 import datetime
 from flask_healthz import HealthError
-from .collectionJob import collectionJob
-
+from collectionJob import CollectionJob
 
 class Probe():
 
     runner = None
     runEveryMinutes = 0
 
-    def __init__(self, runner: collectionJob, runEveryMinutes: int) -> None:
+    def __init__(self, runner: CollectionJob, runEveryMinutes: int) -> None:
         self.runner = runner
         self.runEveryMinutes = runEveryMinutes
 

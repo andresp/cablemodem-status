@@ -1,4 +1,4 @@
-from ..exceptions import ModemConnectionError, ModemCredentialsError
+from exceptions import ModemConnectionError, ModemCredentialsError
 from .observablemodem import ObservableModem
 from bs4 import BeautifulSoup
 from datetime import datetime

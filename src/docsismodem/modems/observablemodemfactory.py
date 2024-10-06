@@ -1,5 +1,5 @@
-from .hitron_coda56 import HitronCoda56
 from .modemtype import ModemType
+from .hitron_coda56 import HitronCoda56
 from .motorola_mb8600 import MotorolaMB8600
 from .netgear_cm2000 import NetgearCM2000
 from .observablemodem import ObservableModem

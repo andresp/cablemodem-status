@@ -1,5 +1,5 @@
-from bs4 import BeautifulSoup
-from datetime import datetime
+import json
+from datetime import datetime, timezone
 from influxdb_client import Point
 import requests
 
@@ -12,26 +12,26 @@ class HitronCoda56(ObservableModem):
 
     def __init__(self, config, logger):
         self.hostname = config['Modem']['Host']
-        self.baseUrl = "http://" + self.hostname
+        self.baseUrl = "https://" + self.hostname
         self.session = requests.Session()
 
         super(HitronCoda56, self).__init__(config, logger)
 
     def formatUpstreamPoints(self, data, sampleTime):
         points = []
-        for index in range(1, len(data)):
+        for index in range(0, len(data)):
             
-            values = data[index].find_all("td")
+            values = data[index]
 
             point = Point("upstreamQam") \
-                .tag("channel", values[0].text) \
-                .tag("modulation", values[3].text) \
-                .tag("mode", values[4].text) \
-                .tag("channelId", int(values[6].text)) \
-                .tag("symbolRate", int(values[2].text)) \
-                .tag("frequency", values[1].text) \
+                .tag("channel", values["portId"]) \
+                .tag("modulation",  values["modtype"]) \
+                .tag("mode", values["scdmaMode"]) \
+                .tag("symbolRate", int(values["bandwidth"])) \
+                .tag("channelId", int(values["channelId"])) \
+                .tag("frequency", values["frequency"]) \
                 .time(sampleTime) \
-                .field("power", float(values[5].text))
+                .field("power", float(values["signalStrength"]))
 
             points.append(point)
 
@@ -39,25 +39,25 @@ class HitronCoda56(ObservableModem):
 
     def formatUpstreamOfdmaPoints(self, data, sampleTime):
         points = []
-        for index in range(1, len(data)):
+        for index in range(0, len(data)):
             
-            values = data[index].find_all("td")
+            values = data[index]
 
-            if values[1].text == "DISABLED":
+            if values["state"] == '  DISABLED':
                 continue
 
             point = Point("upstreamOfdma") \
-                .tag("channel", values[0].text) \
+                .tag("channel", values["uschindex"]) \
                 .tag("modulation", "OFDMA") \
-                .tag("channelId", int(values[0].text)) \
-                .tag("frequency", values[2].text) \
-                .tag("fftsize", values[8].text) \
+                .tag("channelId", int(values["uschindex"])) \
+                .tag("frequency", values["frequency"]) \
+                .tag("fftsize", values["fftVal"]) \
                 .time(sampleTime) \
-                .field("lindigitalatt", float(values[3].text)) \
-                .field("digitalatt", float(values[4].text)) \
-                .field("bw", float(values[5].text)) \
-                .field("power", float(values[6].text)) \
-                .field("power1_6", float(values[7].text)) \
+                .field("digatten", float(values["digAtten"])) \
+                .field("digattenbo", float(values["digAttenBo"])) \
+                .field("channelbw", float(values["channelBw"])) \
+                .field("reppower", float(values["repPower"])) \
+                .field("reppower1_6", float(values["repPower1_6"]))
 
             points.append(point)
 
@@ -66,22 +66,21 @@ class HitronCoda56(ObservableModem):
     def formatDownstreamPoints(self, data, sampleTime):
         points = []
 
-        for index in range(1, len(data) - 1):
+        for index in range(0, len(data)):
 
-            values = data[index].find_all("td")
-            measurement = ""
+            values = data[index]
               
-            point = Point(measurement) \
-                .tag("channel", values[0].text) \
-                .tag("modulation", values[2].text) \
-                .tag("channelId", values[8].text) \
-                .tag("frequency", values[1].text) \
+            point = Point("downstreamQam") \
+                .tag("channel", values["portId"]) \
+                .tag("modulation",  "256QAM" if values["modulation"] == "2" else '"') \
+                .tag("channelId", int(values["channelId"])) \
+                .tag("frequency", values["frequency"]) \
                 .time(sampleTime) \
-                .field("power", float(values[3].text)) \
-                .field("snr", float(values[4].text)) \
-                .field("octetts", int(values[5].text)) \
-                .field("correctables", int(values[6].text)) \
-                .field("uncorrectables", int(values[7].text))
+                .field("power", float(values["signalStrength"])) \
+                .field("snr", float(values["snr"])) \
+                .field("octets", int(values["dsoctets"])) \
+                .field("correctables", int(values["correcteds"])) \
+                .field("uncorrectables", int(values["uncorrect"]))
 
             points.append(point)
 
@@ -90,25 +89,24 @@ class HitronCoda56(ObservableModem):
     def formatDownstreamOfdmPoints(self, data, sampleTime):
         points = []
 
-        for index in range(1, len(data) - 1):
+        for index in range(0, len(data)):
 
-            values = data[index].find_all("td")
-            measurement = ""
+            values = data[index]
             
-            if values[3] != "YES":
+            if values["plclock"] != 'YES':
                 continue
 
-            point = Point(measurement) \
-                .tag("receiver", values[0].text) \
+            point = Point("downstreamOFDM") \
+                .tag("receiver", values["receive"]) \
                 .tag("modulation", "OFDM") \
-                .tag("ffttype", values[1].text) \
-                .tag("frequency", values[2].text) \
+                .tag("ffttype", values["ffttype"]) \
+                .tag("frequency", values["Subcarr0freqFreq"]) \
                 .time(sampleTime) \
-                .field("power", float(values[6].text)) \
-                .field("snr", float(values[7].text)) \
-                .field("octetts", int(values[8].text)) \
-                .field("correctables", int(values[9].text)) \
-                .field("uncorrectables", int(values[10].text))
+                .field("power", float(values["plcpower"])) \
+                .field("snr", float(values["SNR"])) \
+                .field("octets", int(values["dsoctets"])) \
+                .field("correctables", int(values["correcteds"])) \
+                .field("uncorrectables", int(values["uncorrect"]))
 
             points.append(point)
 
@@ -120,23 +118,27 @@ class HitronCoda56(ObservableModem):
     def collectStatus(self):
         self.logger.info("Getting modem status")
 
-        sampleTime = datetime.utcnow().isoformat()
-        response = self.session.get(self.baseUrl + "/index.html#status_docsis/m/1/s/2")
+        sampleTime = datetime.now(timezone.utc).isoformat()
+        now = datetime.now(timezone.utc).timestamp
 
-        # Extract status data
-        statusPage = BeautifulSoup(response.content, features="lxml")
-        downstreamTable = statusPage.find(id="dsInfo")
-
-        downstreamData = downstreamTable[3].find_all("tr")
+        # QAM down
+        response = self.session.get(self.baseUrl + "/data/dsinfo.asp?_=" + str(now), verify=False)
+        downstreamData = json.loads(response.text)
         downstreamPoints = self.formatDownstreamPoints(downstreamData, sampleTime)
 
-        downstreamTableOfdm = statusPage.find(id="dsofdmInfo")
+        # OFDM down
+        response = self.session.get(self.baseUrl + "/data/dsofdminfo.asp?_=" + str(now), verify=False)
+        downstreamTableOfdm = json.loads(response.text)
         downstreamOfdmPoints = self.formatDownstreamOfdmPoints(downstreamTableOfdm, sampleTime)
 
-        upstreamData = statusPage.find(id="usInfo")
+        # TDMA up
+        response = self.session.get(self.baseUrl + "/data/usinfo.asp?_=" + str(now), verify=False)
+        upstreamData = json.loads(response.text)
         upstreamPoints = self.formatUpstreamPoints(upstreamData, sampleTime)
 
-        upstreamOfdmaData = statusPage.find(id="usofdmInfo")
+        # OFDMA up
+        response = self.session.get(self.baseUrl + "/data/usofdminfo.asp?_=" + str(now), verify=False)
+        upstreamOfdmaData = json.loads(response.text)
         upstreamOfdmaPoints = self.formatUpstreamOfdmaPoints(upstreamOfdmaData, sampleTime)
 
         # Store data to InfluxDB

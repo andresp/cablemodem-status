@@ -2,9 +2,9 @@ import datetime
 import functools
 from logging import Logger
 from sched import scheduler
-from .modems.observablemodem import ObservableModem
+from modems.observablemodem import ObservableModem
 
-class collectionJob():
+class CollectionJob():
 
     modem = None
     collectLogs = False
@@ -31,7 +31,7 @@ class collectionJob():
         return catch_exceptions_decorator
 
     @catch_exceptions(cancel_on_failure=False)
-    def collectionJob(self):
+    def CollectionJob(self):
 
         self.modem.login()
 
