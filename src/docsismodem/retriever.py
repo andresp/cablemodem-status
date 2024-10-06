@@ -7,7 +7,7 @@ import schedule
 import time
 from collectionJob import CollectionJob
 from probe import Probe
-from modems import ObservableModemFactory
+from docsismodem.modems import ObservableModemFactory
 
 from flask import Flask
 from flask_healthz import healthz
