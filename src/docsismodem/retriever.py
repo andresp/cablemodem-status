@@ -38,7 +38,7 @@ def main():
     def runDaemon():
         jobRunner.collectionJob()
         consoleLogger.info("Running as daemon")
-        schedule.every(runEveryMinutes).minutes.do(jobRunner.collectionJob)
+        schedule.every(runEveryMinutes).minutes.do(jobRunner.CollectionJob)
 
         if enableHealthProbe is True:
             while 1:
