@@ -5,3 +5,4 @@ class ModemType(StrEnum):
     NetgearCM2000 = "NetgearCM2000"
     TechnicolorXB7 = "TechnicolorXB7"
     TouchstoneTG3492UPCCH = "TouchstoneTG3492UPCCH"
+    HitronCoda56 = "HitronCoda56"

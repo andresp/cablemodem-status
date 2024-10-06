@@ -5,13 +5,12 @@ import logging_loki
 from requests.packages import urllib3
 import schedule
 import time
-from .modems.observablemodemfactory import ObservableModemFactory
+from collectionJob import CollectionJob
+from probe import Probe
+from modems import ObservableModemFactory
 
 from flask import Flask
 from flask_healthz import healthz
-
-from .probe import Probe
-from .collectionJob import collectionJob
 
 def main():
     consoleLogger.info("Connecting to InfluxDB")
@@ -31,7 +30,7 @@ def main():
 
     modem = ObservableModemFactory.get(config['General']['ModemType'], config, consoleLogger)
 
-    jobRunner = collectionJob(modem, config['Modem'].getboolean('CollectLogs'), consoleLogger)
+    jobRunner = CollectionJob(modem, config['Modem'].getboolean('CollectLogs'), consoleLogger)
 
     # Because the modem uses a self-signed certificate and this is expected, disabling the warning to reduce noise.
     urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
@@ -57,7 +56,7 @@ def main():
                 time.sleep(1)
     else:
         consoleLogger.info("One-time execution")
-        jobRunner.collectionJob()
+        jobRunner.CollectionJob()
 
 
 

@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from ..storage.timeserieswriterfactory import TimeseriesWriterFactory
+from storage.timeserieswriterfactory import TimeseriesWriterFactory
 
 class ObservableModem(ABC):
 
