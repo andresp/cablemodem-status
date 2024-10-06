@@ -5,8 +5,8 @@ import logging_loki
 from requests.packages import urllib3
 import schedule
 import time
-from docsismodem.collectionJob import CollectionJob
-from docsismodem.probe import Probe
+from .collectionJob import CollectionJob
+from .probe import Probe
 from docsismodem.modems import ObservableModemFactory
 
 from flask import Flask
