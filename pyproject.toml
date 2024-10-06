@@ -10,6 +10,3 @@ minversion = "6.0"
 testpaths = [
     "tests",
 ]
-pythonpath = [
-  "src"
-]

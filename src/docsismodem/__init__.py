@@ -1,6 +1,5 @@
 from .exceptions import ModemConnectionError, ModemCredentialsError
-from .collectionJob import CollectionJob
 
-__all__ = ["CollectionJob", "ModemConnectionError", "ModemCredentialsError"]
+__all__ = [ "ModemConnectionError", "ModemCredentialsError" ]
 
-__version__ = '0.0.33'
+__version__ = '0.0.40'
