@@ -1,3 +1,11 @@
+[project]
+name = 'docsismodem'
+requires-python = ">=3.11.10"
+version = "0.0.36"
+authors = [
+    {name = "Andres Petralli", email = "6251451+andresp@users.noreply.github.com"},
+]
+
 [build-system]
 requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
