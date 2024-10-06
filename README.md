@@ -17,17 +17,13 @@ This script retrieves channel information from a cable modem and stores time ser
 
 ## Installation
 
-Install the following packages with pip
+Build and install with pip
 
-`pip3 install requests beautifulsoup4 influxdb schedule`
-
-Optionally, for log collection:
-
-`pip3 install python-logging-loki`
+`pip3 install -e .`
 
 ## Configuration
 
-Edit [configuration.ini](./configuration.ini) and fill in your information for the InfluxDB and the modem.
+Edit [configuration.ini](./data/configuration.ini) and fill in your information for the InfluxDB and the modem.
 
 Valid strings for `ModemType`:
 
@@ -40,13 +36,19 @@ Valid strings for `ModemType`:
 
 Test the script by executing it manually and verify it completes without error messages.
 
-`python3 retriever.py`
+`retriever`
+
+## Development / Contributing
+
+Install all dev dependencies: `pip install .[dev]` .
+
+Run unittests: `pytest tests`
 
 ## Set up recurring execution
 
 Create a cron job (executes every 2 minutes):
 
-`*/2 * * * * /usr/bin/python3 /opt/cm-status/retriever.py 2>&1 > /dev/null`
+`*/2 * * * * /usr/local/bin/retriever 2>&1 > /dev/null`
 
 ## Docker
 
@@ -62,6 +64,24 @@ You can monitor the container's status by running:
 
 `docker logs -f cablemodemstatus`
 
+## Docker compose
+
+If you are using Docker Compose, building and installation is even easier. 
+
+Assuming your configuration file is 
+
+`/home/pi/config/configuration.ini`
+
+then all you need to add to your compose.yaml file is this:
+
+```
+  cablemodem_exporter:
+     build: https://github.com/andresp/cablemodem-status.git
+     command: retriever
+     volumes:
+       - /home/pi/config:/app/data:ro
+```
+
 ## Todo
 
 * Implement modules for additional modems:
@@ -69,3 +89,4 @@ You can monitor the container's status by running:
   * Arris SB8200
 * Provide a Grafana Dashboard to visualize collected data
 * Provide turnkey instructions to set up InfluxDB, Grafana and retrieval script
+* Create Prometheus storage writer
