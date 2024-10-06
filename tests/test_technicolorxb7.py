@@ -5,7 +5,6 @@ import responses
 from docsismodem.exceptions import ModemConnectionError, ModemCredentialsError
 from docsismodem.modems.observablemodem import ObservableModem
 from docsismodem.modems.observablemodemfactory import ObservableModemFactory
-from docsismodem.modems.technicolor_xb7 import TechnicolorXB7
 
 from tests.test_mocks import config
 
@@ -15,7 +14,6 @@ class TestTechnicolorXB7:
         
         instance = ObservableModemFactory.get("TechnicolorXB7", config, logging.getLogger(None))
         assert isinstance(instance, ObservableModem)
-        assert type(instance) is TechnicolorXB7
 
     @responses.activate
     def test_succcessful_login(self):

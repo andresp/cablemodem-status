@@ -4,9 +4,9 @@ from docsismodem.modems.observablemodemfactory import ObservableModemFactory
 
 from tests.test_mocks import config
 
-class TestTouchstoneTG3492UPCCH:
+class TestHitronCoda56:
     
     def test_init(self):
         
-        instance = ObservableModemFactory.get("TouchstoneTG3492UPCCH", config, logging.getLogger(None))
+        instance = ObservableModemFactory.get("HitronCoda56", config, logging.getLogger(None))
         assert isinstance(instance, ObservableModem)

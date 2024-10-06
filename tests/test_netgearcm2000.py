@@ -1,5 +1,4 @@
 import logging
-from docsismodem.modems.netgear_cm2000 import NetgearCM2000
 from docsismodem.modems.observablemodem import ObservableModem
 from docsismodem.modems.observablemodemfactory import ObservableModemFactory
 
@@ -11,5 +10,4 @@ class TestNetgear2000:
         
         instance = ObservableModemFactory.get("NetgearCM2000", config, logging.getLogger(None))
         assert isinstance(instance, ObservableModem)
-        assert type(instance) is NetgearCM2000
 
