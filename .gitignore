@@ -140,3 +140,5 @@ cablemodem-status.last
 data/configuration.ini
 
 .kube/
+
+Scripts/
