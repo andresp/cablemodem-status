@@ -36,7 +36,7 @@ def main():
     urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
     def runDaemon():
-        jobRunner.collectionJob()
+        jobRunner.CollectionJob()
         consoleLogger.info("Running as daemon")
         schedule.every(runEveryMinutes).minutes.do(jobRunner.CollectionJob)
 
