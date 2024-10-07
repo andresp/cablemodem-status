@@ -4,6 +4,7 @@ This script retrieves channel information from a cable modem and stores time ser
 
 ## Supported Modems
 
+* Hitron Coda56
 * Motorola MB8600
 * Netgear CM2000
 * Technicolor XB7
@@ -27,6 +28,7 @@ Edit [configuration.ini](./data/configuration.ini) and fill in your information 
 
 Valid strings for `ModemType`:
 
+* `HitronCoda56`
 * `MotorolaMB8600`
 * `NetgearCM2000`
 * `TechnicolorXB7`

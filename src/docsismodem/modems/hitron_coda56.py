@@ -97,7 +97,8 @@ class HitronCoda56(ObservableModem):
                 continue
 
             point = Point("downstreamOFDM") \
-                .tag("receiver", values["receive"]) \
+                .tag("receive", values["receive"]) \
+                .tag("channel", values["receive"]) \
                 .tag("modulation", "OFDM") \
                 .tag("ffttype", values["ffttype"]) \
                 .tag("frequency", values["Subcarr0freqFreq"]) \
