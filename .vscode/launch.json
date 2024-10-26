@@ -5,11 +5,13 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Python: Main",
-            "type": "python",
+            "name": "Python Debugger: Module",
+            "type": "debugpy",
             "request": "launch",
-            "program": "src/docsismodem/retriever.py",
-            "console": "integratedTerminal",
+            "module": "docsismodem.retriever",
+            "env": {
+                "PYTHONPATH": "${workspaceRoot}/src"
+            },
             "justMyCode": false
         }
     ]
