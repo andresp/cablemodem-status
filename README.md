@@ -7,7 +7,7 @@ This script retrieves channel information from a cable modem and stores time ser
 * Hitron Coda56
 * Motorola MB8600
 * Netgear CM2000
-* Technicolor XB7
+* Technicolor XB7/XB8
 * Arris International Touchstone TG3492, configured as Giga Connect Box for UPC.CH Switzerland
 
 ## Dependencies
