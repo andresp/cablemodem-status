@@ -61,5 +61,4 @@ jobs:
         tags: |
           ${{ steps.meta.outputs.tags }}
           ghcr.io/${{ github.repository_owner }}/cablemodem-status/cablemodem-status:${{ steps.buildnum.outputs.buildnum }}
-          ghcr.io/${{ github.repository_owner }}/cablemodem-status/cablemodem-status:latest
         labels: ${{ steps.meta.outputs.labels }}
