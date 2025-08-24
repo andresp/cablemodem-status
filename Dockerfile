@@ -18,7 +18,7 @@ RUN /app/venv/bin/pip3 install build
 RUN /app/venv/bin/python -m build --wheel
 RUN /app/venv/bin/pip3 install dist/*.whl
 
-FROM python:3.11-slim-bullseye as build-image
+FROM python:3.11-slim-bullseye AS build-image
 WORKDIR /app
 COPY --from=compile-image /app/venv /app/venv
 
