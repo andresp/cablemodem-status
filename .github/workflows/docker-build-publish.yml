@@ -6,7 +6,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}/${{ github.repository }}
+  IMAGE_NAME: ${{ github.repository }}/cablemodem-status
 
 jobs:
   push_to_registry:
